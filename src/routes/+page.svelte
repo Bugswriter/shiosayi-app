@@ -1,105 +1,90 @@
+<!-- src/routes/+page.svelte -->
 <script lang="ts">
+  // 1. SvelteKit and Type Imports
   import type { PageData } from "./$types";
-  import Nav from "$lib/components/Nav.svelte";
+
+  // 2. Component Imports
+  import Search from "$lib/components/Search.svelte";
+  import PageHeader from "$lib/components/PageHeader.svelte";
+  import FilterBar from "$lib/components/FilterBar.svelte"; // <-- IMPORT THE NEW COMPONENT
+  import FilmGrid from "$lib/components/FilmGrid.svelte";
+  import Pagination from "$lib/components/Pagination.svelte";
+  import Alert from "$lib/components/Alert.svelte";
+  import EmptyState from "$lib/components/EmptyState.svelte";
+
+  // 3. Page Data and State
   export let data: PageData;
+  let showSearchModal = false;
+
+  // 4. Event Handlers
+  function handleKeydown(event: KeyboardEvent) {
+    // Listens for Ctrl+K or Cmd+K to open the search modal
+    if (event.key === "k" && (event.ctrlKey || event.metaKey)) {
+      event.preventDefault();
+      showSearchModal = true;
+    }
+  }
 </script>
 
+<!-- Global listener for the search shortcut -->
+<svelte:window on:keydown={handleKeydown} />
+
+<!-- The search modal component, its visibility is controlled by this page -->
+<Search
+  bind:isOpen={showSearchModal}
+  on:close={() => (showSearchModal = false)}
+/>
+
+<!-- Sets the document head for this page -->
 <svelte:head>
   <title>
-    {data.searchTerm ? `Searching for "${data.searchTerm}"` : "Film Collection"}
+    {data.searchTerm ? `Search: ${data.searchTerm}` : "Rare Films"}
   </title>
 </svelte:head>
 
-<main class="bg-gray-900 min-h-screen text-gray-300">
-  <Nav searchTerm={data.searchTerm} />
+<!-- Page Wrapper with your custom background -->
+<div
+  class="font-sans bg-[url('')] bg-repeat bg-[length:150px_150px] bg-gray-100/90 text-gray-800 min-h-screen"
+>
+  <PageHeader on:searchClick={() => (showSearchModal = true)} />
 
+  <!-- A container to align the FilterBar and main content -->
   <div class="container mx-auto px-4 sm:px-6 lg:px-8">
-    {#if data.searchTerm}
-      <div class="mb-6 flex justify-between items-center">
-        <h2 class="text-xl text-gray-400">
-          Showing results for: <span class="font-bold text-sky-400"
-            >"{data.searchTerm}"</span
-          >
-        </h2>
-        <a href="/" class="text-sm text-amber-400 hover:underline"
-          >Clear Search</a
-        >
-      </div>
-    {/if}
+    <!-- ADD THE FILTER BAR HERE -->
+    <FilterBar />
 
-    {#if data.error}
-      <div class="bg-red-800 p-4 rounded-lg">
-        <p class="font-bold text-red-200">{data.error}</p>
-      </div>
-    {:else if data.films.length > 0}
-      <div class="space-y-6">
-        {#each data.films as film (film.id)}
-          <div
-            class="bg-gray-800 rounded-lg shadow-lg overflow-hidden flex flex-col md:flex-row"
+    <main class="pt-6 pb-16">
+      {#if data.searchTerm}
+        <div class="mb-6 flex justify-between items-center">
+          <h2 class="text-lg text-gray-700">
+            Results for: <span class="font-semibold text-pink-600"
+              >"{data.searchTerm}"</span
+            >
+          </h2>
+          <a
+            href="/"
+            class="text-sm text-pink-500 hover:text-pink-400 hover:underline transition"
           >
-            <div class="md:w-1/4 xl:w-1/5 flex-shrink-0 bg-gray-700">
-              {#if film.poster_url}
-                <img
-                  src={film.poster_url}
-                  alt="Poster for {film.title}"
-                  class="w-full h-full object-cover"
-                />
-              {/if}
-            </div>
-            <div class="p-6 flex-grow">
-              <h2 class="text-2xl font-bold text-sky-400">
-                {film.title} ({film.year})
-              </h2>
-              <div class="mt-4 flex items-center space-x-4 text-sm">
-                <span
-                  class="bg-cyan-800/50 text-cyan-300 px-3 py-1 rounded-full"
-                  >{film.status}</span
-                >
-                <span
-                  class="bg-purple-800/50 text-purple-300 px-3 py-1 rounded-full"
-                  >{film.region}</span
-                >
-              </div>
-              <p class="mt-4 text-gray-400 leading-relaxed">
-                {film.plot || "No plot summary available."}
-              </p>
-              <div class="mt-6 border-t border-gray-700 pt-4">
-                <h3 class="font-semibold text-white">Guardian Information</h3>
-                <p class="text-teal-400">
-                  {film.guardian_name || "No guardian assigned."}
-                </p>
-              </div>
-            </div>
-          </div>
-        {/each}
-      </div>
+            Clear Search
+          </a>
+        </div>
+      {/if}
 
-      <div class="flex justify-between items-center mt-8 text-gray-300">
-        <a
-          href="?q={data.searchTerm}&page={data.pagination.page - 1}"
-          class:pointer-events-none={data.pagination.page <= 1}
-          class="px-4 py-2 font-bold text-white bg-sky-600 rounded {data
-            .pagination.page <= 1
-            ? 'opacity-50'
-            : 'hover:bg-sky-700'}">Previous</a
-        >
-        <span class="font-mono"
-          >Page {data.pagination.page} of {data.pagination.totalPages}</span
-        >
-        <a
-          href="?q={data.searchTerm}&page={data.pagination.page + 1}"
-          class:pointer-events-none={data.pagination.page >=
-            data.pagination.totalPages}
-          class="px-4 py-2 font-bold text-white bg-sky-600 rounded {data
-            .pagination.page >= data.pagination.totalPages
-            ? 'opacity-50'
-            : 'hover:bg-sky-700'}">Next</a
-        >
-      </div>
-    {:else}
-      <div class="text-center p-8">
-        <p class="text-lg text-amber-400">No films found.</p>
-      </div>
-    {/if}
+      {#if data.error}
+        <Alert message={data.error} />
+      {:else if data.films.length > 0}
+        <FilmGrid films={data.films} />
+        <Pagination
+          currentPage={data.pagination.page}
+          totalPages={data.pagination.totalPages}
+          searchTerm={data.searchTerm}
+        />
+      {:else}
+        <EmptyState />
+      {/if}
+    </main>
   </div>
-</main>
+</div>
+
+<style>
+</style>
