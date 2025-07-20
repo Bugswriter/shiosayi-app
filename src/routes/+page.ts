@@ -1,36 +1,54 @@
-import type { PageLoad } from './$types';
-import { getPaginatedFilms, searchFilms } from '$lib/database';
+// src/routes/+page.ts
+import { getFilms, getRegionsWithFilmCount, type GetFilmsOptions, type Film } from '$lib/database';
+import type { PageData } from './$types';
 
-export const load: PageLoad = async ({ url }) => {
+export async function load({ url, depends }): Promise<PageData> {
+  // It's good practice to declare a dependency on the URL
+  // so SvelteKit knows to re-run this function when the URL changes.
+  depends('app:films');
+
   try {
-    const page = parseInt(url.searchParams.get('page') || '1');
-    const searchTerm = url.searchParams.get('q') || '';
-    const limit = 10;
-    
-    let result;
-    if (searchTerm) {
-      result = await searchFilms(searchTerm, page, limit);
-    } else {
-      result = await getPaginatedFilms(page, limit);
-    }
+    // --- Filters from URL (no changes here) ---
+    const page = parseInt(url.searchParams.get('page') ?? '1');
+    const limit = parseInt(url.searchParams.get('limit') ?? '20');
+    const searchTerm = url.searchParams.get('q') ?? undefined;
+    const region = url.searchParams.get('region') ?? undefined; // Read region from URL
+    const statusesParam = url.searchParams.get('statuses');
+    const statuses = statusesParam
+      ? (statusesParam.split(',') as Film['status'][])
+      : ['orphan'];
 
+    const filters: GetFilmsOptions = { page, limit, searchTerm, region, statuses };
+
+    // --- Data Fetching ---
+    // Use Promise.all to fetch films and regions concurrently for better performance
+    const [paginatedResult, regions] = await Promise.all([
+      getFilms(filters),
+      getRegionsWithFilmCount() // <-- FETCH THE REGIONS HERE
+    ]);
+
+    // --- Return Data ---
     return {
-      films: result.films,
-      searchTerm,
+      films: paginatedResult.films,
+      totalFilms: paginatedResult.totalFilms,
+      filters,
+      regions, // <-- PASS REGIONS TO THE PAGE
       pagination: {
-        page,
-        limit,
-        totalFilms: result.totalFilms,
-        totalPages: Math.ceil(result.totalFilms / limit),
+        page: filters.page,
+        totalPages: Math.ceil(paginatedResult.totalFilms / filters.limit)
       },
-      error: null,
+      error: null
     };
-  } catch (e: any) {
+  } catch (e) {
+    console.error('Failed to load page data:', e);
+    // Return a default shape on error
     return {
       films: [],
-      searchTerm: '',
-      pagination: { page: 1, limit: 10, totalFilms: 0, totalPages: 1 },
-      error: e.message || 'An unknown error occurred.',
+      totalFilms: 0,
+      filters: { page: 1, limit: 20, statuses: ['orphan'] },
+      regions: [],
+      pagination: { page: 1, totalPages: 1 },
+      error: 'Could not connect to the database.'
     };
   }
-};
+}

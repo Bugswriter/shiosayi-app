@@ -34,25 +34,85 @@ const baseSelectQuery = `
   FROM films LEFT JOIN guardians ON films.guardian_id = guardians.id
 `;
 
-export async function getPaginatedFilms(page: number, limit: number): Promise<PaginatedFilmsResult> {
+// ===== Get Films (Universal) ===== //
+
+export interface GetFilmsOptions {
+  page: number;
+  limit: number;
+  searchTerm?: string;
+  statuses?: ('orphan' | 'adopted' | 'abandoned')[];
+  region?: string;
+}
+
+export async function getFilms(options: GetFilmsOptions): Promise<PaginatedFilmsResult> {
+  const { page, limit, searchTerm, statuses, region } = options;
+
   const db = await getDb();
   const offset = (page - 1) * limit;
 
-  const films: Film[] = await db.select(`${baseSelectQuery} ORDER BY films.title ASC LIMIT $1 OFFSET $2`, [limit, offset]);
-  const result: { count: number }[] = await db.select('SELECT COUNT(*) as count FROM films');
+  const whereClauses: string[] = [];
+  const params: (string | number)[] = [];
+  let paramIndex = 1;
+
+  if (searchTerm) {
+    whereClauses.push(`films.title LIKE $${paramIndex++}`);
+    params.push(`%${searchTerm}%`);
+  }
+
+  if (statuses && statuses.length > 0) {
+    const placeholders = statuses.map(() => `$${paramIndex++}`).join(', ');
+    whereClauses.push(`films.status IN (${placeholders})`);
+    params.push(...statuses);
+  }
+
+  if (region) {
+    whereClauses.push(`films.region = $${paramIndex++}`);
+    params.push(region);
+  }
+
+  const whereString = whereClauses.length > 0 ? `WHERE ${whereClauses.join(' AND ')}` : '';
+
+  const filmsQuery = `
+    ${baseSelectQuery}
+    ${whereString}
+    ORDER BY films.title ASC
+    LIMIT $${paramIndex++} OFFSET $${paramIndex++}
+  `;
+  const filmsParams = [...params, limit, offset];
+
+  // The COUNT query needs the same WHERE clause to get an accurate total for the filtered results.
+  const countQuery = `SELECT COUNT(*) as count FROM films ${whereString}`;
+  const countParams = [...params];
+
+  const films: Film[] = await db.select(filmsQuery, filmsParams);
+  const result: { count: number }[] = await db.select(countQuery, countParams);
   const totalFilms = result[0]?.count ?? 0;
 
   return { films, totalFilms };
 }
 
-export async function searchFilms(searchTerm: string, page: number, limit: number): Promise<PaginatedFilmsResult> {
+// ===== Get Regions (with Film Count) ===== //
+
+export interface RegionWithCount {
+  region: string;
+  film_count: number;
+}
+
+export async function getRegionsWithFilmCount(): Promise<RegionWithCount[]> {
   const db = await getDb();
-  const offset = (page - 1) * limit;
-  const likeTerm = `%${searchTerm}%`;
-
-  const films: Film[] = await db.select(`${baseSelectQuery} WHERE films.title LIKE $1 ORDER BY films.title ASC LIMIT $2 OFFSET $3`, [likeTerm, limit, offset]);
-  const result: { count: number }[] = await db.select(`SELECT COUNT(*) as count FROM films WHERE title LIKE $1`, [likeTerm]);
-  const totalFilms = result[0]?.count ?? 0;
-
-  return { films, totalFilms };
+  const query = `
+    SELECT
+      region,
+      COUNT(*) AS film_count
+    FROM
+      films
+    WHERE
+      region IS NOT NULL AND region != ''
+    GROUP BY
+      region
+    ORDER BY
+      region ASC
+  `;
+  const results: RegionWithCount[] = await db.select(query);
+  return results;
 }
