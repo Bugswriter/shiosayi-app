@@ -1,11 +1,12 @@
 <script lang="ts">
+  import { createEventDispatcher } from "svelte";
   import { filtersStore } from "$lib/utils/stores";
   import type { Film, RegionWithCount } from "$lib/services/database";
 
-  // --- Props ---
+  const dispatch = createEventDispatcher();
+
   export let regions: RegionWithCount[] = [];
 
-  // --- Status Filter Logic (No changes here) ---
   const filterOptions: { label: string; value: Film["status"] }[] = [
     { label: "Orphan", value: "orphan" },
     { label: "Adopted", value: "adopted" },
@@ -28,25 +29,15 @@
     });
   }
 
-  // --- Region Filter Logic ---
-  // `bind:value` will ensure this variable ALWAYS matches the store's value.
-  // This is how the component reacts to external changes (like a reset).
   let selectedRegion = $filtersStore.region || "";
-
-  // The reactive statement is no longer needed because bind:value handles this two-way flow.
-  // We can simplify and rely on the bind.
   $: selectedRegion = $filtersStore.region || "";
 
-  // The CORRECTED handler function
   function handleRegionChange(event: Event) {
-    // Get the <select> element from the event
     const target = event.currentTarget as HTMLSelectElement;
-    // Get its NEW value directly. This is guaranteed to be correct.
     const newRegionValue = target.value;
 
     filtersStore.update((currentFilters) => ({
       ...currentFilters,
-      // Use the new value from the event, not the potentially stale `selectedRegion` variable.
       region: newRegionValue || undefined,
       page: 1,
     }));
@@ -56,9 +47,9 @@
 <div
   class="mb-6 p-4 bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg"
 >
-  <div class="flex flex-wrap items-end gap-x-6 gap-y-4">
-    <!-- Status Toggles Section -->
-    <div class="flex-grow">
+  <div class="flex flex-wrap items-end justify-between gap-x-6 gap-y-4">
+    <!-- Left Aligned: Status Filters -->
+    <div>
       <label
         class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
       >
@@ -90,27 +81,58 @@
       </div>
     </div>
 
-    <!-- Region Dropdown Section -->
-    <div class="w-full sm:w-auto md:w-56">
-      <label
-        for="region-filter"
-        class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
-      >
-        Region
-      </label>
-      <select
-        id="region-filter"
-        class="w-full h-10 pl-3 pr-10 text-sm bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm appearance-none focus:outline-none focus:ring-1 focus:ring-pink-500 focus:border-pink-500"
-        bind:value={selectedRegion}
-        on:change={handleRegionChange}
-      >
-        <option value="">All Regions</option>
-        {#each regions as regionItem (regionItem.region)}
-          <option value={regionItem.region}>
-            {regionItem.region} ({regionItem.film_count})
-          </option>
-        {/each}
-      </select>
+    <!-- Right Aligned: Region and Search -->
+    <div class="flex items-end gap-x-4">
+      <div>
+        <label
+          for="region-filter"
+          class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+        >
+          Region
+        </label>
+        <select
+          id="region-filter"
+          class="w-full sm:w-auto md:w-56 h-10 pl-3 pr-10 text-sm bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm appearance-none focus:outline-none focus:ring-1 focus:ring-pink-500 focus:border-pink-500"
+          bind:value={selectedRegion}
+          on:change={handleRegionChange}
+        >
+          <option value="">All Regions</option>
+          {#each regions as regionItem (regionItem.region)}
+            <option value={regionItem.region}>
+              {regionItem.region} ({regionItem.film_count})
+            </option>
+          {/each}
+        </select>
+      </div>
+
+      <div>
+        <label class="block text-sm font-medium mb-1"> </label>
+        <button
+          on:click={() => dispatch("searchClick")}
+          aria-label="Search"
+          class="h-10 flex items-center justify-center gap-x-2 px-3 py-2 bg-white dark:bg-gray-700 text-gray-500 dark:text-gray-400 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm transition-all hover:border-pink-500 dark:hover:border-pink-500 focus:outline-none focus:ring-1 focus:ring-pink-500 focus:border-pink-500"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            class="h-4 w-4"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+            stroke-width="2"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+            />
+          </svg>
+          <kbd
+            class="px-1.5 py-0.5 text-xs font-sans font-semibold text-gray-500 dark:text-gray-400 bg-gray-50 dark:bg-gray-900/40 border border-gray-200 dark:border-gray-700 rounded-md"
+          >
+            Ctrl K
+          </kbd>
+        </button>
+      </div>
     </div>
   </div>
 </div>

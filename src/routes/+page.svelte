@@ -4,21 +4,31 @@
   import { goto } from "$app/navigation";
   import type { PageData } from "./$types";
   import { filtersStore } from "$lib/utils/stores";
+  import { settingsStore } from "$lib/utils/stores";
 
+  // Existing components
   import Search from "$lib/components/Filters/SearchBar.svelte";
-  import PageHeader from "$lib/components/UI/Header.svelte";
+  import Header from "$lib/components/UI/Header.svelte";
+  import Footer from "$lib/components/UI/Footer.svelte";
   import FilterBar from "$lib/components/Filters/FiltersBar.svelte";
   import FilterInfo from "$lib/components/Filters/FiltersInfo.svelte";
   import FilmGrid from "$lib/components/Films/FilmGrid.svelte";
   import Pagination from "$lib/components/Filters/Pagination.svelte";
   import Alert from "$lib/components/UI/Alert.svelte";
   import EmptyState from "$lib/components/Films/NoFilms.svelte";
+  import SettingsModal from "$lib/components/Settings/SettingsModal.svelte";
+
+  // ===== THIS IS THE FIX: Import the missing component =====
+  import SettingsMenu from "$lib/components/Settings/SettingsMenu.svelte";
 
   export let data: PageData;
   let showSearchModal = false;
+  let showSettingsModal = false;
 
   onMount(() => {
+    settingsStore.init();
     filtersStore.set(data.filters);
+
     const unsubscribe = filtersStore.subscribe((currentFilters) => {
       if (JSON.stringify(currentFilters) === JSON.stringify(data.filters)) {
         return;
@@ -37,35 +47,30 @@
     return unsubscribe;
   });
 
-  // ===== EVENT HANDLERS ===== //
+  // ===== EVENT HANDLERS (unchanged) ===== //
   function handleKeydown(event: KeyboardEvent) {
     if (event.key === "k" && (event.ctrlKey || event.metaKey)) {
       event.preventDefault();
       showSearchModal = true;
     }
   }
-
   function handleSearchSubmit(event: CustomEvent<{ searchTerm: string }>) {
-    // This is called when the Search component dispatches 'submit'
     showSearchModal = false;
     filtersStore.update((f) => ({
       ...f,
       searchTerm: event.detail.searchTerm,
-      page: 1, // Reset to page 1 on new search
+      page: 1,
     }));
   }
-
   function handleClearSearch() {
     filtersStore.update((f) => {
-      const { searchTerm, ...rest } = f; // Remove searchTerm from filters
+      const { searchTerm, ...rest } = f;
       return { ...rest, page: 1 };
     });
   }
-
   function handlePrevious() {
     filtersStore.update((f) => ({ ...f, page: Math.max(1, f.page - 1) }));
   }
-
   function handleNext() {
     filtersStore.update((f) => ({ ...f, page: f.page + 1 }));
   }
@@ -73,7 +78,10 @@
 
 <svelte:window on:keydown={handleKeydown} />
 
-<!-- The Search modal now dispatches a 'submit' event -->
+<SettingsModal bind:isOpen={showSettingsModal}>
+  <SettingsMenu />
+</SettingsModal>
+
 <Search
   bind:isOpen={showSearchModal}
   on:submit={handleSearchSubmit}
@@ -91,10 +99,13 @@
 <div
   class="font-sans bg-gray-100/90 dark:bg-amber-900 text-gray-800 min-h-screen"
 >
-  <PageHeader on:searchClick={() => (showSearchModal = true)} />
+  <Header />
 
   <div class="container mx-auto px-4 sm:px-6 lg:px-8">
-    <FilterBar regions={data.regions} />
+    <FilterBar
+      regions={data.regions}
+      on:searchClick={() => (showSearchModal = true)}
+    />
 
     <main class="pb-16 dark:bg-amber-950">
       <FilterInfo />
@@ -114,4 +125,6 @@
       {/if}
     </main>
   </div>
+
+  <Footer on:openSettings={() => (showSettingsModal = true)} />
 </div>

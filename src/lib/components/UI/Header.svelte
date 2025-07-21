@@ -7,19 +7,6 @@
   <h1
     class="text-5xl md:text-5xl font-bold tracking-tight text-gray-800 font-serif drop-shadow-sm"
   >
-    Rare Films
+    Shiosayi Films
   </h1>
-
-  <button
-    on:click={() => dispatch("searchClick")}
-    class="mt-3 text-sm text-gray-600 hover:text-gray-800 transition-colors"
-  >
-    Press
-    <kbd
-      class="ml-1 px-2 py-1 text-xs font-semibold border border-gray-400 rounded bg-gray-200 shadow-inner"
-    >
-      Ctrl K
-    </kbd>
-    to search
-  </button>
 </header>
