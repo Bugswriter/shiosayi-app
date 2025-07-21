@@ -82,11 +82,7 @@
   <SettingsMenu />
 </SettingsModal>
 
-<Search
-  bind:isOpen={showSearchModal}
-  on:submit={handleSearchSubmit}
-  on:close={() => (showSearchModal = false)}
-/>
+<Search bind:isOpen={showSearchModal} on:submit={handleSearchSubmit} />
 
 <svelte:head>
   <title>

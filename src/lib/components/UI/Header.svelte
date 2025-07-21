@@ -5,7 +5,7 @@
 
 <header class="text-center py-5 bg-gray-100 border-b border-gray-300 shadow-sm">
   <h1
-    class="text-5xl md:text-5xl font-bold tracking-tight text-gray-800 font-serif drop-shadow-sm"
+    class="text-4xl md:text-4xl font-bold tracking-tight text-gray-800 font-serif drop-shadow-sm"
   >
     Shiosayi Films
   </h1>

@@ -37,12 +37,6 @@
 
 {#if isOpen}
   <div
-    on:click={closeModal}
-    on:keydown={(e) => {
-      if (e.key === "Escape") {
-        closeModal();
-      }
-    }}
     class="fixed inset-0 z-40 flex items-center justify-center bg-black/60 backdrop-blur-sm"
     role="dialog"
     aria-modal="true"

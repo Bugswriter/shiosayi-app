@@ -14,24 +14,53 @@
 <svelte:window on:keydown={handleKeydown} />
 
 <nav
-  class="mt-10 flex justify-center items-center gap-4"
+  class="mt-10 flex justify-center items-center gap-3"
   aria-label="Pagination Navigation"
 >
+  <!-- Previous Button -->
   <button
     on:click={() => dispatch("previous")}
     disabled={currentPage <= 1}
-    class="px-4 py-2 font-medium text-gray-800 bg-gray-200 rounded border border-gray-400 hover:bg-gray-300 transition disabled:opacity-50 disabled:pointer-events-none"
+    aria-label="Go to previous page"
+    class="h-8 w-8 flex items-center justify-center rounded-full bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 text-gray-500 dark:text-gray-400 transition-colors hover:border-pink-500 hover:text-pink-600 dark:hover:border-pink-500 dark:hover:text-pink-500 focus:outline-none focus:ring-1 focus:ring-pink-500 disabled:opacity-50 disabled:cursor-not-allowed"
   >
-    Previous
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      class="h-4 w-4"
+      fill="none"
+      viewBox="0 0 24 24"
+      stroke="currentColor"
+      stroke-width="2"
+    >
+      <path
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        d="M15 19l-7-7 7-7"
+      />
+    </svg>
   </button>
-  <span class="font-mono text-gray-600 text-sm"
-    >{currentPage} / {totalPages}</span
-  >
+
+  <!-- Page Info -->
+  <span class="text-sm font-medium text-gray-700 dark:text-gray-300 px-2">
+    Page {currentPage} of {totalPages}
+  </span>
+
+  <!-- Next Button -->
   <button
     on:click={() => dispatch("next")}
     disabled={currentPage >= totalPages}
-    class="px-4 py-2 font-medium text-gray-800 bg-gray-200 rounded border border-gray-400 hover:bg-gray-300 transition disabled:opacity-50 disabled:pointer-events-none"
+    aria-label="Go to next page"
+    class="h-8 w-8 flex items-center justify-center rounded-full bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 text-gray-500 dark:text-gray-400 transition-colors hover:border-pink-500 hover:text-pink-600 dark:hover:border-pink-500 dark:hover:text-pink-500 focus:outline-none focus:ring-1 focus:ring-pink-500 disabled:opacity-50 disabled:cursor-not-allowed"
   >
-    Next
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      class="h-4 w-4"
+      fill="none"
+      viewBox="0 0 24 24"
+      stroke="currentColor"
+      stroke-width="2"
+    >
+      <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
+    </svg>
   </button>
 </nav>
