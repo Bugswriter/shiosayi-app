@@ -1,7 +1,11 @@
 <script lang="ts">
   import FilmCard from "./FilmCard.svelte";
-  export let films: any[];
+  import type { Film } from "$lib/services/database";
+
+  export let films: Film[];
   export let totalFilms: number;
+
+  export let selectFilm: (film: Film) => void;
 </script>
 
 <div>
@@ -17,7 +21,8 @@
     class="grid gap-5 sm:gap-6 grid-cols-[repeat(auto-fill,minmax(160px,1fr))] px-0 mx-0 w-full"
   >
     {#each films as film (film.id)}
-      <FilmCard {film} />
+      <!-- When this FilmCard is clicked, we call the selectFilm function with the film data -->
+      <FilmCard {film} on:click={() => selectFilm(film)} />
     {/each}
   </div>
 </div>

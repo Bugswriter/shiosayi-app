@@ -3,6 +3,7 @@
   import { goto } from "$app/navigation";
   import type { PageData } from "./$types";
   import { filtersStore } from "$lib/utils/state";
+  import type { Film } from "$lib/services/database"; // Import the Film type
 
   // Existing components
   import Search from "$lib/components/Filters/SearchBar.svelte";
@@ -16,10 +17,12 @@
   import EmptyState from "$lib/components/Films/NoFilms.svelte";
   import SettingsModal from "$lib/components/Settings/SettingsModal.svelte";
   import SettingsMenu from "$lib/components/Settings/SettingsMenu.svelte";
+  import FilmInfoModal from "$lib/components/Films/FilmInfo.svelte";
 
   export let data: PageData;
   let showSearchModal = false;
   let showSettingsModal = false;
+  let selectedFilm: Film | null = null;
 
   onMount(() => {
     if (data?.filters) {
@@ -79,6 +82,9 @@
 
 <svelte:window on:keydown={handleKeydown} />
 
+<!-- The FilmInfoModal now correctly receives the selected film -->
+<FilmInfoModal bind:film={selectedFilm} />
+
 <SettingsModal bind:isOpen={showSettingsModal}>
   <SettingsMenu />
 </SettingsModal>
@@ -86,7 +92,6 @@
 <Search bind:isOpen={showSearchModal} on:submit={handleSearchSubmit} />
 
 <svelte:head>
-  <!-- ===== THE MAIN FIX IS HERE ===== -->
   <title>
     {data?.filters?.searchTerm
       ? `Search: ${data.filters.searchTerm}`
@@ -108,11 +113,15 @@
     <main class="pb-16 dark:bg-amber-950">
       <FilterInfo />
 
-      <!-- The `{#if data...}` block already acts as a guard, so no change is needed here -->
       {#if data?.error}
         <Alert message={data.error} />
       {:else if data?.films?.length > 0}
-        <FilmGrid films={data.films} totalFilms={data.totalFilms} />
+        <!-- THIS IS THE FIX: The one and only FilmGrid is here, with the selectFilm prop -->
+        <FilmGrid
+          films={data.films}
+          totalFilms={data.totalFilms}
+          selectFilm={(film) => (selectedFilm = film)}
+        />
         <Pagination
           currentPage={data.pagination.page}
           totalPages={data.pagination.totalPages}
