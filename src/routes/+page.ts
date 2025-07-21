@@ -1,5 +1,5 @@
 // src/routes/+page.ts
-import { getFilms, getRegionsWithFilmCount, type GetFilmsOptions, type Film } from '$lib/database';
+import { getFilms, getRegionsWithFilmCount, type GetFilmsOptions, type Film } from '$lib/services/database';
 import type { PageData } from './$types';
 
 export async function load({ url, depends }): Promise<PageData> {

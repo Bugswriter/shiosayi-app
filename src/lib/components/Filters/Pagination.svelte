@@ -1,14 +1,13 @@
 <script lang="ts">
-  import { createEventDispatcher } from "svelte";
-
   export let currentPage: number;
   export let totalPages: number;
 
-  const dispatch = createEventDispatcher();
+  export let onPrevious: () => void;
+  export let onNext: () => void;
 
   function handleKeydown(e: KeyboardEvent) {
-    if (e.key === "ArrowLeft" && currentPage > 1) dispatch("previous");
-    if (e.key === "ArrowRight" && currentPage < totalPages) dispatch("next");
+    if (e.key === "ArrowLeft" && currentPage > 1) onPrevious?.();
+    if (e.key === "ArrowRight" && currentPage < totalPages) onNext?.();
   }
 </script>
 

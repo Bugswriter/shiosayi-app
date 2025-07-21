@@ -1,9 +1,13 @@
-@import "tailwindcss";
 @import url("https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Source+Sans+Pro:wght@400;600&display=swap");
+@import "tailwindcss";
 
-@theme {
-  --font-sans: "Playfair Display", sans-serif;
-  --font-serif: "Playfair Display", serif;
+@custom-variant dark (&:where([data-theme=dark], [data-theme=dark] *));
+
+@layer theme {
+  :root {
+    --font-sans: "Source Sans Pro", sans-serif;
+    --font-serif: "Playfair Display", serif;
+  }
 }
 
 body {

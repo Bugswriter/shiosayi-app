@@ -1,7 +1,6 @@
-<!-- src/lib/components/RegionFilter.svelte -->
 <script lang="ts">
-  import { filtersStore } from "$lib/stores";
-  import type { RegionWithCount } from "$lib/db";
+  import { filtersStore } from "$lib/utils/stores";
+  import type { RegionWithCount } from "$lib/services/database";
 
   export let regions: RegionWithCount[] = [];
 

@@ -2,34 +2,27 @@
 <script lang="ts">
   import { onMount } from "svelte";
   import { goto } from "$app/navigation";
-  import { filtersStore } from "$lib/stores";
   import type { PageData } from "./$types";
+  import { filtersStore } from "$lib/utils/stores";
 
-  import Search from "$lib/components/Search.svelte";
-  import PageHeader from "$lib/components/PageHeader.svelte";
-  import FilterBar from "$lib/components/FilterBar.svelte";
-  import FilmGrid from "$lib/components/FilmGrid.svelte";
-  import Pagination from "$lib/components/Pagination.svelte";
-  import Alert from "$lib/components/Alert.svelte";
-  import EmptyState from "$lib/components/EmptyState.svelte";
+  import Search from "$lib/components/Filters/SearchBar.svelte";
+  import PageHeader from "$lib/components/UI/Header.svelte";
+  import FilterBar from "$lib/components/Filters/FiltersBar.svelte";
+  import FilterInfo from "$lib/components/Filters/FiltersInfo.svelte";
+  import FilmGrid from "$lib/components/Films/FilmGrid.svelte";
+  import Pagination from "$lib/components/Filters/Pagination.svelte";
+  import Alert from "$lib/components/UI/Alert.svelte";
+  import EmptyState from "$lib/components/Films/NoFilms.svelte";
 
   export let data: PageData;
   let showSearchModal = false;
 
-  // ===== CORE REACTIVE LOGIC ===== //
   onMount(() => {
-    // 1. When the page loads, initialize our store with the filters from the `load` function.
     filtersStore.set(data.filters);
-
-    // 2. Subscribe to any changes in the store (e.g., from FilterBar or Pagination).
     const unsubscribe = filtersStore.subscribe((currentFilters) => {
-      // The store is initialized with data.filters, so this check prevents an
-      // immediate navigation on page load.
       if (JSON.stringify(currentFilters) === JSON.stringify(data.filters)) {
         return;
       }
-
-      // 3. Build a new URL query string from the store's state.
       const params = new URLSearchParams();
       params.set("page", String(currentFilters.page));
       params.set("limit", String(currentFilters.limit));
@@ -38,12 +31,10 @@
       if (currentFilters.region) params.set("region", currentFilters.region);
       if (currentFilters.statuses)
         params.set("statuses", currentFilters.statuses.join(","));
-
-      // 4. Navigate to the new URL. SvelteKit will re-run the `load` function.
       goto(`?${params.toString()}`, { keepFocus: true, noScroll: true });
     });
 
-    return unsubscribe; // Clean up the subscription when the component is unmounted.
+    return unsubscribe;
   });
 
   // ===== EVENT HANDLERS ===== //
@@ -97,42 +88,26 @@
   </title>
 </svelte:head>
 
-<div class="font-sans bg-gray-100/90 text-gray-800 min-h-screen">
+<div
+  class="font-sans bg-gray-100/90 dark:bg-amber-900 text-gray-800 min-h-screen"
+>
   <PageHeader on:searchClick={() => (showSearchModal = true)} />
 
   <div class="container mx-auto px-4 sm:px-6 lg:px-8">
-    <!-- FilterBar now works without props by using the store -->
     <FilterBar regions={data.regions} />
 
-    <main class="pb-16">
-      {#if data.filters.searchTerm}
-        <div class="mb-6 flex justify-between items-center">
-          <h2 class="text-lg text-gray-700">
-            Results for:
-            <span class="font-semibold text-pink-600"
-              >"{data.filters.searchTerm}"</span
-            >
-          </h2>
-          <!-- Use a button with an event handler for better accessibility and control -->
-          <button
-            on:click={handleClearSearch}
-            class="text-sm text-pink-500 hover:text-pink-400 hover:underline transition"
-          >
-            Clear Search
-          </button>
-        </div>
-      {/if}
+    <main class="pb-16 dark:bg-amber-950">
+      <FilterInfo />
 
       {#if data.error}
         <Alert message={data.error} />
       {:else if data.films.length > 0}
-        <FilmGrid films={data.films} />
-        <!-- Pagination is now event-driven -->
+        <FilmGrid films={data.films} totalFilms={data.totalFilms} />
         <Pagination
           currentPage={data.pagination.page}
           totalPages={data.pagination.totalPages}
-          on:previous={handlePrevious}
-          on:next={handleNext}
+          onPrevious={handlePrevious}
+          onNext={handleNext}
         />
       {:else}
         <EmptyState />
