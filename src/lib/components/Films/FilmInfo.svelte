@@ -1,6 +1,5 @@
 <script lang="ts">
   import { onMount, onDestroy } from "svelte";
-  import { slide } from "svelte/transition";
 
   interface Film {
     id: number;
@@ -47,7 +46,6 @@
     role="dialog"
     aria-modal="true"
     aria-labelledby="film-title"
-    transition:slide={{ duration: 250, y: 50 }}
   >
     <div class="relative">
       <button

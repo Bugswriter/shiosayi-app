@@ -1,22 +1,25 @@
 <script lang="ts">
-  import type { PageData } from "./$types";
+  import { initializeApp } from "$lib/services/init";
+  import { appState, appError } from "$lib/utils/state";
   import DbInitializer from "$lib/components/UI/Initialize.svelte";
   import DbError from "$lib/components/UI/Crash.svelte";
 
-  export let data: PageData;
+  // This logic now runs the combined init process
+  const startupPromise = initializeApp()
+    .then(() => ($appState = "ready"))
+    .catch((err) => {
+      $appError =
+        err.message || "An unknown error occurred during initialization.";
+      $appState = "error";
+    });
 </script>
 
-{#await data}
+{#await startupPromise}
   <DbInitializer />
-{:then _}
-  {#if _.startupError}
-    <DbError
-      message={_.startupError}
-      on:retry={() => window.location.reload()}
-    />
-  {:else}
+{:then}
+  {#if $appState === "ready"}
     <slot />
+  {:else if $appState === "error"}
+    <DbError message={$appError} on:retry={() => window.location.reload()} />
   {/if}
-{:catch error}
-  <DbError message={error.message} on:retry={() => window.location.reload()} />
 {/await}

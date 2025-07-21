@@ -1,11 +1,8 @@
-import {
-  exists,
-  open,
-  BaseDirectory,
-} from "@tauri-apps/plugin-fs";
+// src/lib/utils/init.ts
+import { exists, open, BaseDirectory } from "@tauri-apps/plugin-fs";
 import { fetch as httpFetch } from "@tauri-apps/plugin-http";
 import { getDatabaseHash, saveDatabaseHash } from "$lib/utils/settings";
-import { settingsStore } from "$lib/utils/state";
+import { settingsStore, guardianStore } from "$lib/utils/state";
 import { closeDbConnection } from "$lib/services/database";
 
 const DB_URL = "https://sys.shiosayi.org/db/public";
@@ -15,13 +12,8 @@ const DB_FILENAME = "public.db";
 async function downloadAndWriteDb(remoteHash: string): Promise<void> {
   await closeDbConnection();
 
-  const response = await httpFetch(DB_URL, {
-    method: "GET",
-  });
-
-  if (!response.ok) {
-    throw new Error(`Failed to download database: ${response.status}`);
-  }
+  const response = await httpFetch(DB_URL, { method: "GET" });
+  if (!response.ok) throw new Error(`Failed to download database: ${response.status}`);
 
   const dbBytes = await response.bytes();
   const digest = await crypto.subtle.digest("SHA-256", dbBytes);
@@ -33,7 +25,7 @@ async function downloadAndWriteDb(remoteHash: string): Promise<void> {
     throw new Error("Database verification failed. Downloaded file is corrupt.");
   }
 
-  console.log("> Trying to download database", DB_FILENAME)
+  console.log("> Trying to download database", DB_FILENAME);
   const file = await open(DB_FILENAME, {
     write: true,
     create: true,
@@ -46,29 +38,28 @@ async function downloadAndWriteDb(remoteHash: string): Promise<void> {
 }
 
 export async function initializeApp(): Promise<void> {
-  await settingsStore.init();
+  // 1. Initialize settings store to load API key and theme
+  const initialSettings = await settingsStore.init();
 
-  console.log("> Trying to check if database exist")
-  const dbExists = await exists(DB_FILENAME, {
-    baseDir: BaseDirectory.AppData,
-  });
+  // 2. Authenticate guardian if an API key exists
+  if (initialSettings.apiKey) {
+    console.log("> API key found, attempting to authenticate guardian...");
+    await guardianStore.authenticate(initialSettings.apiKey);
+  }
+
+  // 3. Initialize the database (check for updates)
+  console.log("> Checking database status...");
+  const dbExists = await exists(DB_FILENAME, { baseDir: BaseDirectory.AppData });
   let remoteHash: string | null = null;
 
   try {
-    const hashResponse = await httpFetch(HASH_URL, {
-      method: "GET",
-    });
-
-    if (!hashResponse.ok) {
-      throw new Error("Server not reachable");
-    }
+    const hashResponse = await httpFetch(HASH_URL, { method: "GET" });
+    if (!hashResponse.ok) throw new Error("Server not reachable");
     const hashText = await hashResponse.text();
     remoteHash = hashText.split(" ")[0].trim();
   } catch (e) {
     if (!dbExists) {
-      throw new Error(
-        "Could not connect to the server to download the database."
-      );
+      throw new Error("Could not connect to the server to download the database.");
     }
     console.warn("Server unreachable. Running in offline mode.");
     return;
@@ -77,7 +68,7 @@ export async function initializeApp(): Promise<void> {
   const localHash = await getDatabaseHash();
 
   if (remoteHash && (!dbExists || localHash !== remoteHash)) {
-    console.log("Database update required. Closing connection and downloading...");
+    console.log("Database update required. Downloading...");
     await downloadAndWriteDb(remoteHash);
     await saveDatabaseHash(remoteHash);
   } else {

@@ -1,5 +1,5 @@
 import '../app.css';
-import { initializeApp } from '$lib/services/dbInitializer';
+import { initializeApp } from '$lib/services/init';
 
 export const prerender = true;
 export const ssr = false;
