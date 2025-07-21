@@ -1,6 +1,5 @@
 <!-- src/lib/components/Settings/SettingsModal.svelte -->
 <script lang="ts">
-  import { fly } from "svelte/transition";
   import { onMount, onDestroy } from "svelte";
 
   export let isOpen = false;
@@ -39,14 +38,19 @@
 {#if isOpen}
   <div
     on:click={closeModal}
+    on:keydown={(e) => {
+      if (e.key === "Escape") {
+        closeModal();
+      }
+    }}
     class="fixed inset-0 z-40 flex items-center justify-center bg-black/60 backdrop-blur-sm"
     role="dialog"
     aria-modal="true"
+    tabindex="-1"
   >
     <div
-      on:click|stopPropagation
       class="relative w-full max-w-lg p-6 bg-white dark:bg-gray-800 rounded-xl shadow-2xl"
-      transition:fly={{ y: -20, duration: 300 }}
+      role="document"
     >
       <slot />
 
