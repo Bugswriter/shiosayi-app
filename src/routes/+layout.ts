@@ -1,7 +1,15 @@
-// Tauri doesn't have a Node.js server to do proper SSR
-// so we will use adapter-static to prerender the app (SSG)
-// See: https://v2.tauri.app/start/frontend/sveltekit/ for more info
 import '../app.css';
+import { initializeApp } from '$lib/services/dbInitializer';
 
 export const prerender = true;
 export const ssr = false;
+
+export async function load() {
+  try {
+    await initializeApp();
+    return { startupError: null };
+  } catch (e: any) {
+    console.error("Fatal startup error in +layout.ts:", e);
+    return { startupError: e.message };
+  }
+}

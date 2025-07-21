@@ -1,5 +1,7 @@
+<!-- src/lib/components/Settings/ThemeSwitcher.svelte -->
 <script lang="ts">
-  import { settingsStore } from "$lib/utils/stores";
+  import { settingsStore } from "$lib/utils/state";
+  import type { Theme } from "$lib/utils/settings";
 
   const themes: { id: Theme; label: string; icon: string }[] = [
     {

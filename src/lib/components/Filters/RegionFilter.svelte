@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { filtersStore } from "$lib/utils/stores";
+  import { filtersStore } from "$lib/utils/state";
   import type { RegionWithCount } from "$lib/services/database";
 
   export let regions: RegionWithCount[] = [];

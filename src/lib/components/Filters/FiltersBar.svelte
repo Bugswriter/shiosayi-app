@@ -1,6 +1,6 @@
 <script lang="ts">
   import { createEventDispatcher } from "svelte";
-  import { filtersStore } from "$lib/utils/stores";
+  import { filtersStore } from "$lib/utils/state";
   import type { Film, RegionWithCount } from "$lib/services/database";
 
   const dispatch = createEventDispatcher();

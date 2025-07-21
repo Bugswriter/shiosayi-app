@@ -1,5 +1,6 @@
+<!-- src/lib/components/Settings/ApiKeyManager.svelte -->
 <script lang="ts">
-  import { settingsStore } from "$lib/utils/stores";
+  import { settingsStore } from "$lib/utils/state";
   import { fly } from "svelte/transition";
 
   let currentKey = $settingsStore.apiKey || "";
@@ -8,7 +9,7 @@
   function handleSave() {
     settingsStore.setApiKey(currentKey);
     saved = true;
-    setTimeout(() => (saved = false), 2000); // Hide "Saved!" message after 2 seconds
+    setTimeout(() => (saved = false), 2000);
   }
 </script>
 

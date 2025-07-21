@@ -2,15 +2,32 @@
   "$schema": "../gen/schemas/desktop-schema.json",
   "identifier": "default",
   "description": "Capability for the main window",
-  "windows": [
-    "main"
-  ],
+  "windows": ["main"],
   "permissions": [
     "core:default",
     "opener:default",
-    "http:default",
+    {
+      "identifier": "http:default",
+      "allow": [{ "url": "https://sys.shiosayi.org/*" }]
+    },
+    "store:default",
     "sql:default",
-    "sql:allow-execute",
-    "store:default"
+    "fs:default",
+    {
+      "identifier": "fs:allow-exists",
+      "allow": [{ "path": "$APPDATA/*" }]
+    },
+        {
+      "identifier": "fs:allow-open",
+      "allow": [{ "path": "$APPDATA/*" }]
+    },
+    {
+      "identifier": "fs:allow-appdata-read-recursive",
+      "allow": [{ "path": "$APPDATA/*" }]
+    },
+    {
+      "identifier": "fs:allow-write-file",
+      "allow": [{ "path": "$APPDATA/*" }]
+    }
   ]
 }

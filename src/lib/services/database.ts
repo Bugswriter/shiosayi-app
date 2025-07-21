@@ -1,6 +1,7 @@
-import Database from '@tauri-apps/plugin-sql';
-import { appDataDir, join } from '@tauri-apps/api/path';
+import Database from "@tauri-apps/plugin-sql";
+import { appDataDir, join } from "@tauri-apps/api/path";
 
+// --- Type Definitions (Unchanged) ---
 export interface Film {
   id: number;
   title: string;
@@ -9,42 +10,64 @@ export interface Film {
   poster_url: string | null;
   region: string | null;
   guardian_id: string | null;
-  status: 'orphan' | 'adopted' | 'abandoned';
+  status: "orphan" | "adopted" | "abandoned";
   updated_at: string | null;
   guardian_name: string | null;
 }
 
-interface PaginatedFilmsResult {
+export interface PaginatedFilmsResult {
   films: Film[];
   totalFilms: number;
 }
 
+export interface GetFilmsOptions {
+  page: number;
+  limit: number;
+  searchTerm?: string;
+  statuses?: ("orphan" | "adopted" | "abandoned")[];
+  region?: string;
+}
+
+export interface RegionWithCount {
+  region: string;
+  film_count: number;
+}
+
+
 let db: Database | null = null;
+let initializationPromise: Promise<Database> | null = null;
 
 async function getDb(): Promise<Database> {
   if (db) return db;
-  const dataDir = await appDataDir();
-  const dbPath = await join(dataDir, 'public.db');
-  db = await Database.load(`sqlite:${dbPath}`);
-  return db;
+  if (initializationPromise) return await initializationPromise;
+  initializationPromise = (async () => {
+    const dataDir = await appDataDir();
+    const dbPath = await join(dataDir, "public.db");
+    console.log("> Trying to open SQL Database")
+    const newDb = await Database.load(`sqlite:${dbPath}`);
+    db = newDb;
+    return newDb;
+  })();
+  return await initializationPromise;
 }
+
+export async function closeDbConnection(): Promise<void> {
+  if (db) {
+    await db.close();
+    db = null;
+    initializationPromise = null;
+  }
+}
+
 
 const baseSelectQuery = `
   SELECT films.*, guardians.name as guardian_name
   FROM films LEFT JOIN guardians ON films.guardian_id = guardians.id
 `;
 
-// ===== Get Films (Universal) ===== //
-
-export interface GetFilmsOptions {
-  page: number;
-  limit: number;
-  searchTerm?: string;
-  statuses?: ('orphan' | 'adopted' | 'abandoned')[];
-  region?: string;
-}
-
-export async function getFilms(options: GetFilmsOptions): Promise<PaginatedFilmsResult> {
+export async function getFilms(
+  options: GetFilmsOptions
+): Promise<PaginatedFilmsResult> {
   const { page, limit, searchTerm, statuses, region } = options;
 
   const db = await getDb();
@@ -60,7 +83,7 @@ export async function getFilms(options: GetFilmsOptions): Promise<PaginatedFilms
   }
 
   if (statuses && statuses.length > 0) {
-    const placeholders = statuses.map(() => `$${paramIndex++}`).join(', ');
+    const placeholders = statuses.map(() => `$${paramIndex++}`).join(", ");
     whereClauses.push(`films.status IN (${placeholders})`);
     params.push(...statuses);
   }
@@ -70,7 +93,8 @@ export async function getFilms(options: GetFilmsOptions): Promise<PaginatedFilms
     params.push(region);
   }
 
-  const whereString = whereClauses.length > 0 ? `WHERE ${whereClauses.join(' AND ')}` : '';
+  const whereString =
+    whereClauses.length > 0 ? `WHERE ${whereClauses.join(" AND ")}` : "";
 
   const filmsQuery = `
     ${baseSelectQuery}
@@ -80,7 +104,6 @@ export async function getFilms(options: GetFilmsOptions): Promise<PaginatedFilms
   `;
   const filmsParams = [...params, limit, offset];
 
-  // The COUNT query needs the same WHERE clause to get an accurate total for the filtered results.
   const countQuery = `SELECT COUNT(*) as count FROM films ${whereString}`;
   const countParams = [...params];
 
@@ -89,13 +112,6 @@ export async function getFilms(options: GetFilmsOptions): Promise<PaginatedFilms
   const totalFilms = result[0]?.count ?? 0;
 
   return { films, totalFilms };
-}
-
-// ===== Get Regions (with Film Count) ===== //
-
-export interface RegionWithCount {
-  region: string;
-  film_count: number;
 }
 
 export async function getRegionsWithFilmCount(): Promise<RegionWithCount[]> {

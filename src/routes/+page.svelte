@@ -1,10 +1,8 @@
-<!-- src/routes/+page.svelte -->
 <script lang="ts">
   import { onMount } from "svelte";
   import { goto } from "$app/navigation";
   import type { PageData } from "./$types";
-  import { filtersStore } from "$lib/utils/stores";
-  import { settingsStore } from "$lib/utils/stores";
+  import { filtersStore } from "$lib/utils/state";
 
   // Existing components
   import Search from "$lib/components/Filters/SearchBar.svelte";
@@ -17,8 +15,6 @@
   import Alert from "$lib/components/UI/Alert.svelte";
   import EmptyState from "$lib/components/Films/NoFilms.svelte";
   import SettingsModal from "$lib/components/Settings/SettingsModal.svelte";
-
-  // ===== THIS IS THE FIX: Import the missing component =====
   import SettingsMenu from "$lib/components/Settings/SettingsMenu.svelte";
 
   export let data: PageData;
@@ -26,11 +22,16 @@
   let showSettingsModal = false;
 
   onMount(() => {
-    settingsStore.init();
-    filtersStore.set(data.filters);
+    if (data?.filters) {
+      filtersStore.set(data.filters);
+    }
 
     const unsubscribe = filtersStore.subscribe((currentFilters) => {
-      if (JSON.stringify(currentFilters) === JSON.stringify(data.filters)) {
+      // The guard below is important to prevent an infinite loop on first load
+      if (
+        data?.filters &&
+        JSON.stringify(currentFilters) === JSON.stringify(data.filters)
+      ) {
         return;
       }
       const params = new URLSearchParams();
@@ -85,8 +86,9 @@
 <Search bind:isOpen={showSearchModal} on:submit={handleSearchSubmit} />
 
 <svelte:head>
+  <!-- ===== THE MAIN FIX IS HERE ===== -->
   <title>
-    {data.filters.searchTerm
+    {data?.filters?.searchTerm
       ? `Search: ${data.filters.searchTerm}`
       : "Rare Films"}
   </title>
@@ -99,16 +101,17 @@
 
   <div class="container mx-auto px-4 sm:px-6 lg:px-8">
     <FilterBar
-      regions={data.regions}
+      regions={data?.regions}
       on:searchClick={() => (showSearchModal = true)}
     />
 
     <main class="pb-16 dark:bg-amber-950">
       <FilterInfo />
 
-      {#if data.error}
+      <!-- The `{#if data...}` block already acts as a guard, so no change is needed here -->
+      {#if data?.error}
         <Alert message={data.error} />
-      {:else if data.films.length > 0}
+      {:else if data?.films?.length > 0}
         <FilmGrid films={data.films} totalFilms={data.totalFilms} />
         <Pagination
           currentPage={data.pagination.page}
