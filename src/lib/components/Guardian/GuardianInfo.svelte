@@ -1,7 +1,6 @@
 <!-- src/lib/components/Guardian/GuardianInfo.svelte -->
 <script lang="ts">
   import { onMount, onDestroy } from "svelte";
-  import { slide } from "svelte/transition";
   import { guardianStore } from "$lib/utils/state";
   import GuardianCard from "./GuardianCard.svelte";
 
@@ -41,7 +40,6 @@
     role="dialog"
     aria-modal="true"
     aria-labelledby="guardian-title"
-    transition:slide={{ duration: 250, y: 50 }}
   >
     <div class="relative p-6 sm:p-8">
       <button
