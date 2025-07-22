@@ -45,7 +45,7 @@
 </script>
 
 <div
-  class="mb-6 p-4 bg-zinc-100 border rounded-b-lg border-zinc-200 dark:bg-zinc-800 dark:border-zinc-700"
+  class="p-4 bg-zinc-100 border rounded-b-lg border-zinc-200 dark:bg-zinc-800 dark:border-zinc-700"
 >
   <div class="flex flex-wrap items-end justify-between gap-x-6 gap-y-4">
     <div>
