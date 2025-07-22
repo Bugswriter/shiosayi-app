@@ -32,12 +32,13 @@
 </script>
 
 <div class="flex flex-col gap-2">
-  <p class="text-sm text-gray-500 dark:text-gray-400">
+  <!-- Muted text using the zinc palette -->
+  <p class="text-sm text-zinc-600 dark:text-zinc-400">
     Join the <a
       href="https://bugswriter.com/members"
       target="_blank"
       rel="noopener noreferrer"
-      class="text-pink-600 hover:underline dark:text-pink-400"
+      class="text-pink-600 hover:underline dark:text-pink-500 dark:hover:text-pink-400"
       >shiosayi membership</a
     > to obtain an API key.
   </p>
@@ -46,15 +47,17 @@
       type="password"
       bind:value={currentKey}
       placeholder="Enter your API key..."
-      class="flex-grow w-full h-10 px-3 text-sm bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-pink-500"
+      class="flex-grow w-full h-10 px-3 text-sm bg-white dark:bg-zinc-700 text-zinc-900 dark:text-zinc-100 border border-zinc-300 dark:border-zinc-600 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-pink-500"
       on:keydown={(e) => {
         if (e.key === "Enter") handleSave();
       }}
       disabled={isLoading}
     />
+
+    <!-- Save button retains brand color but gets a dark mode hover state -->
     <button
       on:click={handleSave}
-      class="flex-shrink-0 h-10 w-20 flex items-center justify-center font-semibold text-white bg-pink-600 rounded-md shadow-sm hover:bg-pink-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-pink-500 transition-colors disabled:opacity-50"
+      class="flex-shrink-0 h-10 w-20 flex items-center justify-center font-semibold text-white bg-pink-600 rounded-md shadow-sm hover:bg-pink-700 dark:hover:bg-pink-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-pink-500 transition-colors disabled:opacity-50"
       disabled={!currentKey || isLoading}
     >
       {#if isLoading}
@@ -68,7 +71,13 @@
       {/if}
     </button>
   </div>
+  <!-- Error message gets a slightly brighter red for dark mode contrast -->
   {#if errorMsg}
-    <p class="text-xs text-red-500" transition:fly={{ y: -5 }}>{errorMsg}</p>
+    <p
+      class="text-xs text-red-600 dark:text-red-500"
+      transition:fly={{ y: -5 }}
+    >
+      {errorMsg}
+    </p>
   {/if}
 </div>

@@ -45,16 +45,10 @@
 </script>
 
 <div
-  class="mb-6 p-4 bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg"
+  class="mb-6 p-4 bg-zinc-100 border border-zinc-200 rounded-lg dark:bg-zinc-800 dark:border-zinc-700"
 >
   <div class="flex flex-wrap items-end justify-between gap-x-6 gap-y-4">
-    <!-- Left Aligned: Status Filters -->
     <div>
-      <label
-        class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
-      >
-        Status
-      </label>
       <div class="flex items-center gap-2">
         {#each filterOptions as filter (filter.value)}
           {@const isActive = $filtersStore.statuses?.includes(filter.value)}
@@ -66,14 +60,15 @@
             class:border-pink-600={isActive}
             class:shadow-md={isActive}
             class:hover:bg-pink-700={isActive}
+            class:dark:hover:bg-pink-500={isActive}
             class:bg-white={!isActive}
-            class:dark:bg-gray-700={!isActive}
-            class:text-gray-600={!isActive}
-            class:dark:text-gray-300={!isActive}
-            class:border-gray-300={!isActive}
-            class:dark:border-gray-600={!isActive}
-            class:hover:bg-gray-50={!isActive}
-            class:dark:hover:bg-gray-600={!isActive}
+            class:dark:bg-zinc-700={!isActive}
+            class:text-zinc-700={!isActive}
+            class:dark:text-zinc-300={!isActive}
+            class:border-zinc-300={!isActive}
+            class:dark:border-zinc-600={!isActive}
+            class:hover:bg-zinc-50={!isActive}
+            class:dark:hover:bg-zinc-600={!isActive}
           >
             {filter.label}
           </button>
@@ -84,15 +79,9 @@
     <!-- Right Aligned: Region and Search -->
     <div class="flex items-end gap-x-4">
       <div>
-        <label
-          for="region-filter"
-          class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
-        >
-          Region
-        </label>
         <select
           id="region-filter"
-          class="w-full sm:w-auto md:w-56 h-10 pl-3 pr-10 text-sm bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm appearance-none focus:outline-none focus:ring-1 focus:ring-pink-500 focus:border-pink-500"
+          class="w-full sm:w-auto md:w-56 h-10 pl-3 pr-10 text-sm bg-white dark:bg-zinc-700 border border-zinc-300 dark:border-zinc-600 rounded-md shadow-sm appearance-none focus:outline-none focus:ring-1 focus:ring-pink-500 focus:border-pink-500"
           bind:value={selectedRegion}
           on:change={handleRegionChange}
         >
@@ -110,7 +99,7 @@
         <button
           on:click={() => dispatch("searchClick")}
           aria-label="Search"
-          class="h-10 flex items-center justify-center gap-x-2 px-3 py-2 bg-white dark:bg-gray-700 text-gray-500 dark:text-gray-400 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm transition-all hover:border-pink-500 dark:hover:border-pink-500 focus:outline-none focus:ring-1 focus:ring-pink-500 focus:border-pink-500"
+          class="h-10 flex items-center justify-center gap-x-2 px-3 py-2 bg-white dark:bg-zinc-700 text-zinc-500 dark:text-zinc-400 border border-zinc-300 dark:border-zinc-600 rounded-md shadow-sm transition-all hover:border-pink-500 dark:hover:border-pink-500 focus:outline-none focus:ring-1 focus:ring-pink-500 focus:border-pink-500"
         >
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -127,7 +116,7 @@
             />
           </svg>
           <kbd
-            class="px-1.5 py-0.5 text-xs font-sans font-semibold text-gray-500 dark:text-gray-400 bg-gray-50 dark:bg-gray-900/40 border border-gray-200 dark:border-gray-700 rounded-md"
+            class="px-1.5 py-0.5 text-xs font-sans font-semibold text-zinc-500 dark:text-zinc-400 bg-zinc-50 dark:bg-zinc-900/40 border border-zinc-200 dark:border-zinc-700 rounded-md"
           >
             Ctrl K
           </kbd>

@@ -23,22 +23,23 @@
 </script>
 
 <div
-  class="grid grid-cols-3 gap-0 overflow-hidden rounded-lg border border-gray-300 dark:border-gray-600"
+  class="grid grid-cols-3 gap-0 overflow-hidden rounded-lg border border-zinc-300 dark:border-zinc-600"
 >
   {#each themes as theme (theme.id)}
     {@const isActive = $settingsStore.theme === theme.id}
     <button
       on:click={() => settingsStore.setTheme(theme.id)}
-      class="flex flex-col items-center justify-center p-4 text-center text-sm font-semibold transition-colors duration-150 focus:outline-none focus:relative focus:z-10 focus:ring-2 focus:ring-pink-500"
+      class="flex flex-col items-center justify-center gap-1 p-4 text-center text-sm font-semibold transition-colors duration-150 focus:outline-none focus:relative focus:z-10 focus:ring-2 focus:ring-pink-500"
       class:bg-pink-600={isActive}
       class:text-white={isActive}
       class:hover:bg-pink-700={isActive}
+      class:dark:hover:bg-pink-500={isActive}
       class:bg-white={!isActive}
-      class:dark:bg-gray-700={!isActive}
-      class:text-gray-600={!isActive}
-      class:dark:text-gray-300={!isActive}
-      class:hover:bg-gray-100={!isActive}
-      class:dark:hover:bg-gray-600={!isActive}
+      class:dark:bg-zinc-700={!isActive}
+      class:text-zinc-600={!isActive}
+      class:dark:text-zinc-300={!isActive}
+      class:hover:bg-zinc-100={!isActive}
+      class:dark:hover:bg-zinc-600={!isActive}
     >
       {@html theme.icon}
       {theme.label}

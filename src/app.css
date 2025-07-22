@@ -3,11 +3,67 @@
 
 @custom-variant dark (&:where([data-theme=dark], [data-theme=dark] *));
 
-@layer theme {
-  :root {
-    --font-sans: "Source Sans Pro", sans-serif;
-    --font-serif: "Playfair Display", serif;
-  }
+@theme {
+  --font-sans: "Source Sans Pro", sans-serif;
+  --font-serif: "Playfair Display", serif;
+
+  /* Layout & Text */
+  --color-background: #ffffff; /* Page background */
+  --color-foreground: #09090b; /* Default text color */
+  --color-muted-foreground: #71717a; /* Muted text for subtitles, placeholders */
+
+  /* Containers (Cards, Modals, Headers) */
+  --color-card: #f9fafb; /* Card background */
+  --color-card-foreground: #09090b; /* Text on cards */
+  --color-popover: #ffffff; /* Popover background */
+  --color-popover-foreground: #09090b; /* Text on popovers */
+
+  /* Interactive Elements */
+  --color-primary: #db2777; /* Main brand color (pink) */
+  --color-primary-foreground: #fafafa; /* Text on top of primary color */
+  --color-secondary: #f4f4f5; /* Secondary buttons */
+  --color-secondary-foreground: #18181b;
+  --color-accent: #f4f4f5; /* Hover backgrounds, active states */
+  --color-accent-foreground: #18181b; /* Text on top of accent color */
+  --color-destructive: #ef4444; /* Destructive actions (red) */
+  --color-destructive-foreground: #fafafa;
+
+  /* Borders & Focus */
+  --color-border: #e4e4e7; /* Default border color */
+  --color-input: #e4e4e7; /* Input field borders */
+  --color-ring: #db2777; /* Focus rings */
+}
+
+/* 
+  ================================================================
+  Discord-Like Dark Theme Overrides
+  ================================================================
+*/
+@theme [data-theme="dark"] {
+  /* Layout & Text */
+  --color-background: #1e1f22; /* Very dark gray/blue */
+  --color-foreground: #e3e4e6; /* Main off-white text */
+  --color-muted-foreground: #949ba4; /* THE classic Discord muted text color */
+
+  /* Containers (Cards, Modals, Headers) */
+  --color-card: #2b2d31; /* Slightly lighter container background */
+  --color-card-foreground: #f2f3f5; /* Brightest text for emphasis on cards */
+  --color-popover: #1e1f22;
+  --color-popover-foreground: #f2f3f5;
+
+  /* Interactive Elements */
+  /* Primary is kept the same for brand consistency */
+  --color-secondary: #40444b; /* Dark gray for secondary buttons */
+  --color-secondary-foreground: #f2f3f5;
+  --color-accent: #383a40; /* Hover state background */
+  --color-accent-foreground: #f2f3f5;
+  --color-destructive: #f04747; /* Discord's red */
+  --color-destructive-foreground: #f2f3f5;
+
+  /* Borders & Focus */
+  --color-border: #3f4248; /* Subtle border for separation */
+  --color-input: #202225; /* Input background, slightly darker */
+  /* Ring color remains the brand pink */
 }
 
 body {

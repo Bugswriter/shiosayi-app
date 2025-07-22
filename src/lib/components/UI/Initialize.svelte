@@ -19,10 +19,10 @@
 </script>
 
 <div
-  class="fixed inset-0 z-50 flex flex-col items-center justify-center bg-gray-100/90 dark:bg-amber-950/95 text-gray-800 dark:text-gray-200"
+  class="fixed inset-0 z-50 flex flex-col items-center justify-center bg-white/90 dark:bg-zinc-900/95 text-zinc-800 dark:text-zinc-200"
 >
   <svg
-    class="size-12 animate-spin text-amber-600"
+    class="size-12 animate-spin text-pink-600"
     xmlns="http://www.w3.org/2000/svg"
     fill="none"
     viewBox="0 0 24 24"

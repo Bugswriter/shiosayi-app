@@ -5,7 +5,7 @@
 </script>
 
 <div
-  class="flex items-center gap-4 p-3 bg-gray-100 dark:bg-gray-700/50 rounded-lg"
+  class="flex items-center gap-4 p-3 bg-zinc-100 dark:bg-zinc-800 rounded-lg"
 >
   <img
     src={film.poster_url ||
@@ -14,9 +14,9 @@
     class="w-14 h-auto aspect-[2/3] object-cover rounded-md shadow-md flex-shrink-0"
   />
   <div class="overflow-hidden">
-    <p class="font-bold text-gray-800 dark:text-gray-100 truncate">
+    <p class="font-bold text-zinc-900 dark:text-zinc-100 truncate">
       {film.title}
     </p>
-    <p class="text-sm text-gray-600 dark:text-gray-400">{film.year}</p>
+    <p class="text-sm text-zinc-600 dark:text-zinc-400">{film.year}</p>
   </div>
 </div>

@@ -34,18 +34,22 @@ function createFiltersStore() {
 }
 export const filtersStore = createFiltersStore();
 
-// --- Settings Store (Unchanged) ---
 function applyTheme(theme: Theme) {
-    if (typeof document === "undefined") return;
-    const root = document.documentElement;
-    // NOTE: I'm assuming your app.css uses the .dark class for theming.
-    const isDark = theme === "dark" || (theme === "system" && window.matchMedia("(prefers-color-scheme: dark)").matches);
-    if (isDark) {
-        root.classList.add('dark');
-    } else {
-        root.classList.remove('dark');
-    }
+  if (typeof document === "undefined") return;
+  const root = document.documentElement;
+
+  const isDark =
+    theme === "dark" ||
+    (theme === "system" &&
+      window.matchMedia("(prefers-color-scheme: dark)").matches);
+
+  if (isDark) {
+    root.setAttribute("data-theme", "dark");
+  } else {
+    root.removeAttribute("data-theme");
+  }
 }
+
 function createSettingsStore() {
     const { subscribe, set, update } = writable<Omit<AppSettings, 'databaseHash'>>({ apiKey: null, theme: "system" });
     return {

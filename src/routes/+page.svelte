@@ -3,9 +3,9 @@
   import { goto } from "$app/navigation";
   import type { PageData } from "./$types";
   import { filtersStore } from "$lib/utils/state";
-  import type { Film } from "$lib/services/database"; // Import the Film type
+  import type { Film } from "$lib/services/database";
 
-  // Existing components
+  // Components
   import Search from "$lib/components/Filters/SearchBar.svelte";
   import Header from "$lib/components/UI/Header.svelte";
   import Footer from "$lib/components/UI/Footer.svelte";
@@ -28,9 +28,7 @@
     if (data?.filters) {
       filtersStore.set(data.filters);
     }
-
     const unsubscribe = filtersStore.subscribe((currentFilters) => {
-      // The guard below is important to prevent an infinite loop on first load
       if (
         data?.filters &&
         JSON.stringify(currentFilters) === JSON.stringify(data.filters)
@@ -40,18 +38,16 @@
       const params = new URLSearchParams();
       params.set("page", String(currentFilters.page));
       params.set("limit", String(currentFilters.limit));
-
       if (currentFilters.searchTerm) params.set("q", currentFilters.searchTerm);
       if (currentFilters.region) params.set("region", currentFilters.region);
       if (currentFilters.statuses)
         params.set("statuses", currentFilters.statuses.join(","));
       goto(`?${params.toString()}`, { keepFocus: true, noScroll: true });
     });
-
     return unsubscribe;
   });
 
-  // ===== EVENT HANDLERS (unchanged) ===== //
+  // --- Event Handlers (Unchanged) ---
   function handleKeydown(event: KeyboardEvent) {
     if (event.key === "k" && (event.ctrlKey || event.metaKey)) {
       event.preventDefault();
@@ -66,12 +62,6 @@
       page: 1,
     }));
   }
-  function handleClearSearch() {
-    filtersStore.update((f) => {
-      const { searchTerm, ...rest } = f;
-      return { ...rest, page: 1 };
-    });
-  }
   function handlePrevious() {
     filtersStore.update((f) => ({ ...f, page: Math.max(1, f.page - 1) }));
   }
@@ -82,11 +72,10 @@
 
 <svelte:window on:keydown={handleKeydown} />
 
-<!-- The FilmInfoModal now correctly receives the selected film -->
 <FilmInfoModal bind:film={selectedFilm} />
 
 <SettingsModal bind:isOpen={showSettingsModal}>
-  <SettingsMenu />
+  <SettingsMenu on:close={() => (showSettingsModal = false)} />
 </SettingsModal>
 
 <Search bind:isOpen={showSearchModal} on:submit={handleSearchSubmit} />
@@ -100,7 +89,7 @@
 </svelte:head>
 
 <div
-  class="font-sans bg-gray-100/90 dark:bg-amber-900 text-gray-800 min-h-screen"
+  class="font-sans bg-white text-zinc-800 dark:bg-zinc-900 dark:text-zinc-200 min-h-screen"
 >
   <Header />
 
@@ -110,13 +99,13 @@
       on:searchClick={() => (showSearchModal = true)}
     />
 
-    <main class="pb-16 dark:bg-amber-950">
+    <!-- The <main> element is restored to its original structural purpose, without extra backgrounds or padding. -->
+    <main class="py-6 pb-24">
       <FilterInfo />
 
       {#if data?.error}
         <Alert message={data.error} />
       {:else if data?.films?.length > 0}
-        <!-- THIS IS THE FIX: The one and only FilmGrid is here, with the selectFilm prop -->
         <FilmGrid
           films={data.films}
           totalFilms={data.totalFilms}

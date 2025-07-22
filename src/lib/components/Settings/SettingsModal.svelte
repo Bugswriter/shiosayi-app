@@ -42,15 +42,17 @@
     aria-modal="true"
     tabindex="-1"
   >
+    <!-- Modal container uses white/zinc for a clean look -->
     <div
-      class="relative w-full max-w-lg p-6 bg-white dark:bg-gray-800 rounded-xl shadow-2xl"
+      class="relative w-full max-w-lg p-6 bg-white dark:bg-zinc-800 rounded-xl shadow-2xl"
       role="document"
     >
       <slot />
 
+      <!-- Close button uses muted zinc colors -->
       <button
         on:click={closeModal}
-        class="absolute top-3 right-3 p-1 text-gray-400 rounded-full hover:bg-gray-100 hover:text-gray-700 dark:hover:bg-gray-700 dark:hover:text-white transition-colors"
+        class="absolute top-3 right-3 p-1 text-zinc-400 rounded-full hover:bg-zinc-100 hover:text-zinc-700 dark:hover:bg-zinc-700 dark:hover:text-zinc-200 transition-colors"
         aria-label="Close modal"
       >
         <svg

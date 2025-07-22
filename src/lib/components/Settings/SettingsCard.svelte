@@ -5,7 +5,7 @@
 
 <div
   on:click={() => dispatch("open")}
-  class="relative flex items-center justify-between p-4 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-sm hover:shadow-md transition-shadow cursor-pointer"
+  class="relative flex items-center justify-between p-4 bg-white border border-zinc-200 rounded-lg shadow-sm hover:shadow-md transition-shadow cursor-pointer dark:bg-zinc-800 dark:border-zinc-700"
   role="button"
   tabindex="0"
   on:keydown={(e) => e.key === "Enter" && dispatch("open")}

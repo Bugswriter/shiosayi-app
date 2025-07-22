@@ -1,6 +1,5 @@
 <script lang="ts">
   import { createEventDispatcher, onDestroy, tick } from "svelte";
-  import { fly } from "svelte/transition";
 
   /**
    * This is now a two-way bindable prop.
@@ -55,18 +54,16 @@
 </script>
 
 {#if isOpen}
-  <!-- svelte-ignore a11y_click_events_have_key_events -->
   <div
-    on:click={close}
+    role="button"
+    tabindex="0"
     class="fixed inset-0 z-50 flex items-start justify-center pt-20 sm:pt-32 bg-black/60 backdrop-blur-sm"
   >
     <div
-      on:click|stopPropagation
       role="dialog"
       aria-modal="true"
       aria-label="Search films"
-      transition:fly={{ y: -20, duration: 300 }}
-      class="w-full max-w-xl bg-white dark:bg-gray-800 rounded-xl shadow-2xl overflow-hidden"
+      class="w-full max-w-xl bg-white dark:bg-zinc-800 rounded-xl shadow-2xl overflow-hidden"
     >
       <form on:submit|preventDefault={handleSubmit}>
         <div class="relative">
@@ -75,7 +72,7 @@
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
-              class="h-5 w-5 text-gray-400"
+              class="h-5 w-5 text-zinc-400"
               fill="none"
               viewBox="0 0 24 24"
               stroke="currentColor"
@@ -94,15 +91,14 @@
             bind:value={searchTerm}
             use:autofocus
             placeholder="Search films by title..."
-            class="w-full border-0 bg-transparent py-4 pl-12 pr-12 text-lg text-gray-800 placeholder:text-gray-400 focus:outline-none focus:ring-0 dark:text-gray-100 dark:placeholder:text-gray-500"
+            class="w-full border-0 bg-transparent py-4 pl-12 pr-12 text-lg text-zinc-800 placeholder:text-zinc-400 focus:outline-none focus:ring-0 dark:text-zinc-100 dark:placeholder:text-zinc-500"
           />
 
-          <!-- The close button now correctly calls the fixed close() function -->
           <button
             type="button"
             on:click={close}
             aria-label="Close"
-            class="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-400 hover:text-gray-700 dark:hover:text-white"
+            class="absolute inset-y-0 right-0 flex items-center pr-3 text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200"
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -123,11 +119,11 @@
       </form>
 
       <div
-        class="border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50 p-3 text-center"
+        class="border-t border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-800/50 p-3 text-center"
       >
-        <p class="text-sm text-gray-500 dark:text-gray-400">
+        <p class="text-sm text-zinc-500 dark:text-zinc-400">
           Press <kbd
-            class="px-1.5 py-0.5 text-xs font-sans font-semibold text-gray-500 dark:text-gray-400 bg-gray-200 dark:bg-gray-900/40 border border-gray-300 dark:border-gray-700 rounded-md"
+            class="px-1.5 py-0.5 text-xs font-sans font-semibold text-zinc-500 dark:text-zinc-400 bg-zinc-200 dark:bg-zinc-900/40 border border-zinc-300 dark:border-zinc-700 rounded-md"
             >Enter</kbd
           > to search
         </p>
