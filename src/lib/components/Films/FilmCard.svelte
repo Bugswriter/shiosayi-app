@@ -8,7 +8,11 @@
   <figure>
     {#if film.poster_url}
       <div
-        class="relative w-full h-auto aspect-[2/3] bg-card border border-border shadow-[0_2px_6px_rgba(0,0,0,0.15)] group-hover:scale-105 transition-transform duration-200 overflow-hidden rounded-md"
+        class="relative w-full h-auto aspect-[2/3] bg-white dark:bg-zinc-800 rounded-md overflow-hidden
+               border-2 border-zinc-200 dark:border-zinc-700
+               shadow-md dark:shadow-black/20
+               transition-all duration-200
+               group-hover:shadow-xl group-hover:border-pink-500"
       >
         <img
           class="w-full h-full object-cover"
@@ -20,10 +24,12 @@
       </div>
     {/if}
     <figcaption class="mt-2 text-center">
-      <p class="text-sm font-medium text-card-foreground truncate">
+      <p class="text-sm font-medium text-zinc-900 dark:text-zinc-100 truncate">
         {film.title}
       </p>
-      <p class="text-xs text-muted-foreground">{film.year || "N/A"}</p>
+      <p class="text-xs text-zinc-500 dark:text-zinc-400">
+        {film.year || "N/A"}
+      </p>
     </figcaption>
   </figure>
 </button>
