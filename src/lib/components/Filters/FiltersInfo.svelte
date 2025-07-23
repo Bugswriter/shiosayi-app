@@ -1,3 +1,4 @@
+<!-- src/lib/components/Filters/FiltersInfo.svelte -->
 <script lang="ts">
   import { filtersStore } from "$lib/utils/state";
 

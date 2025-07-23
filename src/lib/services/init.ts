@@ -1,8 +1,8 @@
-// src/lib/utils/init.ts
+// src/lib/services/init.ts
 import { exists, open, BaseDirectory } from "@tauri-apps/plugin-fs";
 import { fetch as httpFetch } from "@tauri-apps/plugin-http";
 import { getDatabaseHash, saveDatabaseHash } from "$lib/utils/settings";
-import { settingsStore, guardianStore } from "$lib/utils/state";
+import { settingsStore, authStore } from "$lib/utils/state";
 import { closeDbConnection } from "$lib/services/database";
 
 const DB_URL = "https://sys.shiosayi.org/db/public";
@@ -38,16 +38,13 @@ async function downloadAndWriteDb(remoteHash: string): Promise<void> {
 }
 
 export async function initializeApp(): Promise<void> {
-  // 1. Initialize settings store to load API key and theme
-  const initialSettings = await settingsStore.init();
+  // 1. Initialize settings (theme) and authentication concurrently
+  await Promise.all([
+    settingsStore.init(),
+    authStore.initialize() // This now handles all auth logic on startup
+  ]);
 
-  // 2. Authenticate guardian if an API key exists
-  if (initialSettings.apiKey) {
-    console.log("> API key found, attempting to authenticate guardian...");
-    await guardianStore.authenticate(initialSettings.apiKey);
-  }
-
-  // 3. Initialize the database (check for updates)
+  // 2. Initialize the database (check for updates)
   console.log("> Checking database status...");
   const dbExists = await exists(DB_FILENAME, { baseDir: BaseDirectory.AppData });
   let remoteHash: string | null = null;

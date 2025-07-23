@@ -10,7 +10,8 @@
   import Header from "$lib/components/UI/Header.svelte";
   import Footer from "$lib/components/UI/Footer.svelte";
   import FilterBar from "$lib/components/Filters/FiltersBar.svelte";
-  import FilterInfo from "$lib/components/Filters/FiltersInfo.svelte";
+  // --- FIX 1: Correctly import 'FiltersInfo' ---
+  import FiltersInfo from "$lib/components/Filters/FiltersInfo.svelte";
   import FilmGrid from "$lib/components/Films/FilmGrid.svelte";
   import Pagination from "$lib/components/Filters/Pagination.svelte";
   import Alert from "$lib/components/UI/Alert.svelte";
@@ -47,7 +48,6 @@
     return unsubscribe;
   });
 
-  // --- Event Handlers (Unchanged) ---
   function handleKeydown(event: KeyboardEvent) {
     if (event.key === "k" && (event.ctrlKey || event.metaKey)) {
       event.preventDefault();
@@ -99,9 +99,12 @@
       on:searchClick={() => (showSearchModal = true)}
     />
 
-    <!-- The <main> element is restored to its original structural purpose, without extra backgrounds or padding. -->
     <main class="py-6 pb-24">
-      <FilterInfo />
+      <!-- 
+        --- FIX 2: Call the correct component without any props. ---
+        This solves the TypeScript error because your real component doesn't need them.
+      -->
+      <FiltersInfo />
 
       {#if data?.error}
         <Alert message={data.error} />

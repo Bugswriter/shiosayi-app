@@ -1,6 +1,6 @@
 <!-- src/lib/components/Settings/ApiKeyManager.svelte -->
 <script lang="ts">
-  import { guardianStore } from "$lib/utils/state";
+  import { authStore } from "$lib/utils/state";
   import { fly } from "svelte/transition";
   import { createEventDispatcher } from "svelte";
 
@@ -16,7 +16,7 @@
     errorMsg = null;
     justSaved = false;
 
-    const success = await guardianStore.authenticate(currentKey);
+    const success = await authStore.authenticate(currentKey);
 
     if (success) {
       justSaved = true;
