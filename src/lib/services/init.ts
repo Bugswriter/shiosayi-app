@@ -9,13 +9,28 @@ const DB_URL = "https://sys.shiosayi.org/db/public";
 const HASH_URL = "https://sys.shiosayi.org/db/public.sha256";
 const DB_FILENAME = "public.db";
 
+
+
 async function downloadAndWriteDb(remoteHash: string): Promise<void> {
   await closeDbConnection();
 
-  const response = await httpFetch(DB_URL, { method: "GET" });
-  if (!response.ok) throw new Error(`Failed to download database: ${response.status}`);
+  const response = await httpFetch(DB_URL, {
+    method: "GET",
+    // Explicitly tell the plugin to return the body as raw bytes.
+    // This ensures consistent behavior across platforms.
+    responseType: "bytes" 
+  });
 
-  const dbBytes = await response.bytes();
+  if (!response.ok) {
+    throw new Error(`Failed to download database: ${response.status}`);
+  }
+
+  // --- THE FIX ---
+  // The raw byte data is in the `data` property.
+  // We ensure it's a Uint8Array, which is the standard format.
+  const dbBytes = new Uint8Array(response.data as number[]);
+
+  // The rest of the function works perfectly with a Uint8Array.
   const digest = await crypto.subtle.digest("SHA-256", dbBytes);
   const actualHash = Array.from(new Uint8Array(digest))
     .map((b) => b.toString(16).padStart(2, "0"))
@@ -25,7 +40,7 @@ async function downloadAndWriteDb(remoteHash: string): Promise<void> {
     throw new Error("Database verification failed. Downloaded file is corrupt.");
   }
 
-  console.log("> Trying to download database", DB_FILENAME);
+  console.log("> Trying to write database to disk", DB_FILENAME);
   const file = await open(DB_FILENAME, {
     write: true,
     create: true,
@@ -35,6 +50,7 @@ async function downloadAndWriteDb(remoteHash: string): Promise<void> {
 
   await file.write(dbBytes);
   await file.close();
+  console.log("> Database written successfully.");
 }
 
 export async function initializeApp(): Promise<void> {
