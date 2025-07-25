@@ -1,6 +1,20 @@
 import Database from "@tauri-apps/plugin-sql";
 import { appDataDir, join } from "@tauri-apps/api/path";
 
+export interface Guardian {
+  id: string; // Add the guardian's ID (e.g., "g002")
+  name: string;
+  email: string;
+  tier: "lover" | "keeper" | "savior";
+  // films: GuardianFilm[]; // REMOVE THIS LINE
+}
+
+export interface AuthState {
+  status: "pending" | "authenticated" | "unauthenticated";
+  guardian: Guardian | null;
+  apiKey: string | null;
+}
+
 // --- Type Definitions (Unchanged) ---
 export interface Film {
   id: number;
@@ -131,4 +145,38 @@ export async function getRegionsWithFilmCount(): Promise<RegionWithCount[]> {
   `;
   const results: RegionWithCount[] = await db.select(query);
   return results;
+}
+
+export async function getFilmsByGuardianId(guardianId: string): Promise<Film[]> {
+  const db = await getDb();
+  
+  // We only need a few fields for the list display.
+  const query = `
+    SELECT id, title, year, region
+    FROM films
+    WHERE guardian_id = $1
+    ORDER BY title ASC
+  `;
+
+  try {
+    const films: Film[] = await db.select(query, [guardianId]);
+    return films;
+  } catch (error) {
+    console.error(`Error fetching films for guardian ${guardianId}:`, error);
+    return []; // Return an empty array on error
+  }
+}
+
+export async function countFilmsByGuardianId(guardianId: string): Promise<number> {
+  const db = await getDb();
+  
+  const query = `SELECT COUNT(*) as count FROM films WHERE guardian_id = $1`;
+
+  try {
+    const result: { count: number }[] = await db.select(query, [guardianId]);
+    return result[0]?.count ?? 0; // Return the count, or 0 if something goes wrong
+  } catch (error) {
+    console.error(`Error counting films for guardian ${guardianId}:`, error);
+    return 0; // Return 0 on error
+  }
 }

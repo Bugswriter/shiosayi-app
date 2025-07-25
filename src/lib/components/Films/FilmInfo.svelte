@@ -1,12 +1,14 @@
 <script lang="ts">
   import { onMount, onDestroy } from "svelte";
   import { fly } from "svelte/transition";
-
-  // --- Import everything we need ---
   import { authStore, filtersStore } from "$lib/utils/state";
   import { fetch as httpFetch } from "@tauri-apps/plugin-http";
   import { writeText } from "@tauri-apps/plugin-clipboard-manager";
 
+  // --- THIS IS THE FIX: Import the new database function ---
+  import { countFilmsByGuardianId } from "$lib/services/database";
+
+  // Interface for Film prop
   interface Film {
     id: number;
     title: string;
@@ -22,29 +24,38 @@
 
   export let film: Film | null;
 
-  // --- State for Magnet Link Button ---
+  // --- State for Component Logic ---
   let isFetchingMagnet = false;
   let magnetError: string | null = null;
   let magnetSuccess = false;
-
-  // --- State for Adoption Button ---
   let isAdopting = false;
   let adoptionError: string | null = null;
   let adoptionSuccess = false;
 
-  // --- Tier Limit Logic ---
+  // --- THIS IS THE FIX: New local state for the adoption count ---
+  let currentAdoptionCount = 0;
+
   const tierLimits = {
     lover: 1,
     keeper: 5,
     savior: 10,
   };
 
-  // Reactive variable to check if the user has reached their adoption limit.
-  // This will automatically update if the authStore changes.
+  // --- THIS IS THE FIX: New reactive logic ---
+  // This block runs whenever the modal opens or the auth state changes.
+  // It fetches the adoption count from the local DB.
+  $: if (film && $authStore.status === "authenticated" && $authStore.guardian) {
+    countFilmsByGuardianId($authStore.guardian.id).then((count) => {
+      currentAdoptionCount = count;
+    });
+  }
+
+  // --- THIS IS THE FIX: The limit check now uses our local state ---
   $: isAdoptionLimitReached =
     $authStore.guardian &&
-    $authStore.guardian.films.length >= tierLimits[$authStore.guardian.tier];
+    currentAdoptionCount >= tierLimits[$authStore.guardian.tier];
 
+  // --- All other functions (closeModal, getMagnetLink, etc.) remain the same ---
   function closeModal() {
     film = null;
   }
@@ -55,7 +66,6 @@
     }
   }
 
-  // --- Function to get the magnet link ---
   async function getMagnetLink() {
     const apiKey = $authStore.apiKey;
     if (!film || !apiKey) return;
@@ -81,7 +91,6 @@
     }
   }
 
-  // --- Function to adopt a film ---
   async function adoptFilm() {
     const apiKey = $authStore.apiKey;
     if (!film || !apiKey || isAdoptionLimitReached) return;
@@ -99,6 +108,9 @@
       if (!response.ok) throw new Error(data.error || "Adoption failed.");
 
       adoptionSuccess = true;
+
+      // --- THIS IS THE FIX: Manually increment our local count after successful adoption ---
+      currentAdoptionCount++;
 
       // Update the main film grid in the background by triggering a filter change
       filtersStore.update((f) => ({ ...f }));

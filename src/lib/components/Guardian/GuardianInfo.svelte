@@ -1,8 +1,9 @@
 <!-- src/lib/components/Guardian/GuardianInfo.svelte -->
 <script lang="ts">
-  import { onMount, onDestroy } from "svelte";
+  import { onDestroy, onMount } from "svelte";
   import { authStore } from "$lib/utils/state";
-  import GuardianCard from "./GuardianCard.svelte";
+  import { getFilmsByGuardianId } from "$lib/services/database";
+  import type { Film } from "$lib/services/database";
 
   export let isOpen: boolean;
 
@@ -12,7 +13,18 @@
     savior: 10,
   };
 
-  // No need for a separate 'guardian' variable, we'll use authStore directly.
+  // --- NEW: Local state for adopted films ---
+  let isLoadingFilms = true;
+  let adoptedFilms: Film[] = [];
+
+  // --- NEW: Reactive logic to fetch films when the modal opens ---
+  $: if (isOpen && $authStore.guardian?.id) {
+    isLoadingFilms = true;
+    getFilmsByGuardianId($authStore.guardian.id).then((films) => {
+      adoptedFilms = films;
+      isLoadingFilms = false;
+    });
+  }
 
   function closeModal() {
     isOpen = false;
@@ -28,11 +40,6 @@
   onDestroy(() => window.removeEventListener("keydown", handleKeydown));
 </script>
 
-<!--
-  THE FIX:
-  We check for `isOpen` AND if the `guardian` property inside the authStore is not null.
-  This prevents the component from trying to render with no data.
--->
 {#if isOpen && $authStore.guardian}
   <div
     class="fixed inset-0 bg-black/70 backdrop-blur-sm z-40"
@@ -69,7 +76,6 @@
 
       <div class="flex flex-col gap-6">
         <div>
-          <!-- THE FIX: We access `$authStore.guardian.name` and `.tier` -->
           <h2
             id="guardian-title"
             class="text-2xl lg:text-3xl font-bold text-zinc-900 dark:text-zinc-100"
@@ -83,27 +89,40 @@
           </p>
         </div>
 
+        <!-- THE FIX: Use `adoptedFilms.length` -->
         <div class="text-sm">
-          <!-- THE FIX: We access `$authStore.guardian.films` and `.email` -->
           <p class="text-zinc-800 dark:text-zinc-300">
             <span class="font-semibold">Adopted Films:</span>
-            {$authStore.guardian.films.length} / {tierLimits[
-              $authStore.guardian.tier
-            ]}
+            {adoptedFilms.length} / {tierLimits[$authStore.guardian.tier]}
           </p>
           <p class="text-zinc-500 dark:text-zinc-400">
             {$authStore.guardian.email}
           </p>
         </div>
 
-        <div class="flex flex-col gap-3 max-h-[40vh] overflow-y-auto pr-2">
-          <!-- THE FIX: We access `$authStore.guardian.films` -->
-          {#if $authStore.guardian.films.length > 0}
-            {#each $authStore.guardian.films as film (film.id)}
-              <GuardianCard {film} />
-            {/each}
+        <div
+          class="flex flex-col gap-3 max-h-[40vh] overflow-y-auto pr-2 border-t border-b border-zinc-200 dark:border-zinc-700 py-4"
+        >
+          {#if isLoadingFilms}
+            <p class="text-center text-zinc-500 dark:text-zinc-400">
+              Loading your films...
+            </p>
+          {:else if adoptedFilms.length > 0}
+            <!-- THE FIX: Use `adoptedFilms` for the loop -->
+            <ul class="space-y-2">
+              {#each adoptedFilms as film (film.id)}
+                <li class="text-sm text-zinc-800 dark:text-zinc-300">
+                  <span class="font-medium">{film.title}</span>
+                  {#if film.year}
+                    <span class="text-zinc-500 dark:text-zinc-400"
+                      >({film.year})</span
+                    >
+                  {/if}
+                </li>
+              {/each}
+            </ul>
           {:else}
-            <p class="text-center text-zinc-500 dark:text-zinc-400 py-4">
+            <p class="text-center text-zinc-500 dark:text-zinc-400">
               You have not adopted any films yet.
             </p>
           {/if}

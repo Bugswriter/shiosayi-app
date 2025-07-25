@@ -15,10 +15,10 @@ export interface GuardianFilm {
 }
 
 export interface Guardian {
+  id: string; // <-- This line is essential
   name: string;
   email: string;
   tier: "lover" | "keeper" | "savior";
-  films: GuardianFilm[];
 }
 
 // ===================================================================
