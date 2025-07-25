@@ -9,31 +9,29 @@ const DB_URL = "https://sys.shiosayi.org/db/public";
 const HASH_URL = "https://sys.shiosayi.org/db/public.sha256";
 const DB_FILENAME = "public.db";
 
-// This function is now correct, assuming the CORS issue on the backend is fixed.
 async function downloadAndWriteDb(remoteHash: string): Promise<void> {
+  // This is critical to ensure we can overwrite the file.
   await closeDbConnection();
 
   console.log("> Downloading new database...");
-  const response = await httpFetch(DB_URL, {
-    method: "GET",
-    responseType: "bytes" 
-  });
+  const response = await httpFetch(DB_URL, { method: "GET" });
 
+  // This single check is sufficient.
   if (!response.ok) {
-    // This part was being triggered by the CORS issue.
-    console.error("Download failed. Status:", response.status, "Headers:", response.headers);
     throw new Error(`Failed to download database: Server responded with status ${response.status}`);
   }
 
-  const dbBytes = new Uint8Array(response.data as number[]);
+  // Get the raw bytes from the response.
+  const dbBytes = await response.bytes();
 
+  // Verify the hash of the downloaded content.
   const digest = await crypto.subtle.digest("SHA-256", dbBytes);
   const actualHash = Array.from(new Uint8Array(digest))
     .map((b) => b.toString(16).padStart(2, "0"))
     .join("");
 
   if (actualHash !== remoteHash) {
-    throw new Error("Database verification failed. Downloaded file is corrupt.");
+    throw new Error("Database verification failed. Downloaded file is corrupt or hash mismatch.");
   }
 
   console.log("> Writing database to disk...");
@@ -49,9 +47,8 @@ async function downloadAndWriteDb(remoteHash: string): Promise<void> {
   console.log("> Database written successfully.");
 }
 
-// --- THIS IS THE NEW, MORE RESILIENT INITIALIZATION LOGIC ---
 export async function initializeApp(): Promise<void> {
-  // 1. Initialize non-database settings and authentication concurrently.
+  // Start initializing user-specific settings and auth state in parallel.
   await Promise.all([
     settingsStore.init(),
     authStore.initialize()
@@ -61,11 +58,16 @@ export async function initializeApp(): Promise<void> {
 
   try {
     const dbExists = await exists(DB_FILENAME, { baseDir: BaseDirectory.AppData });
-
-    // Fetch remote hash first. If this fails, we can potentially run offline.
-    const hashResponse = await httpFetch(HASH_URL, { method: "GET" });
-    if (!hashResponse.ok) throw new Error("Server not reachable to check for updates.");
     
+    // --- FIX: Use the consistent `httpFetch` pattern here. ---
+    // This replaces the incorrect `getClient` and `client.get` logic.
+    const hashResponse = await httpFetch(HASH_URL, { method: "GET" });
+
+    if (!hashResponse.ok) {
+      throw new Error("Server not reachable to check for updates.");
+    }
+    
+    // --- FIX: For the `fetch` API, we get the body with the `.text()` method. ---
     const hashText = await hashResponse.text();
     const remoteHash = hashText.split(" ")[0].trim();
     const localHash = await getDatabaseHash();
@@ -73,7 +75,6 @@ export async function initializeApp(): Promise<void> {
     console.log(`> Remote hash: ${remoteHash}`);
     console.log(`> Local hash:  ${localHash}`);
 
-    // Condition to update: If the file doesn't exist OR the hashes don't match.
     if (!dbExists || localHash !== remoteHash) {
       console.log("! Database update required.");
       await downloadAndWriteDb(remoteHash);
@@ -86,14 +87,12 @@ export async function initializeApp(): Promise<void> {
   } catch (error) {
     console.error("! Failed to initialize/update database:", error);
     
-    // CRITICAL RESILIENCY LOGIC:
-    // Only throw a fatal error if we absolutely cannot continue.
+    // Fallback: If an error occurs but a DB file already exists, we can run offline.
     const dbExists = await exists(DB_FILENAME, { baseDir: BaseDirectory.AppData });
     if (!dbExists) {
-      // This is a fatal error: it's the first run AND we couldn't download the DB.
+      // If there's no local DB at all, the app can't start.
       throw new Error("Could not connect to server to download database for the first time.");
     } else {
-      // It's not the first run, so we can survive.
       console.warn("! Running in offline mode with existing local database.");
     }
   }
