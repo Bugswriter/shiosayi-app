@@ -111,7 +111,7 @@ export type AppState = "initializing" | "ready" | "error";
 export const appState = writable<AppState>("initializing");
 export const appError = writable<string | null>(null);
 
-const initialFilters: GetFilmsOptions = { page: 1, limit: 8, statuses: ["orphan"] };
+const initialFilters: GetFilmsOptions = { page: 1, limit: 8, status: "orphan" };
 function createFiltersStore() {
   const { subscribe, set, update } = writable<GetFilmsOptions>({ ...initialFilters });
   return { subscribe, set, update, reset: () => set({ ...initialFilters }) };

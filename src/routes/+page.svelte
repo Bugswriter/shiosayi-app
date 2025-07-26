@@ -10,7 +10,6 @@
   import Header from "$lib/components/UI/Header.svelte";
   import Footer from "$lib/components/UI/Footer.svelte";
   import FilterBar from "$lib/components/Filters/FiltersBar.svelte";
-  // --- FIX 1: Correctly import 'FiltersInfo' ---
   import FiltersInfo from "$lib/components/Filters/FiltersInfo.svelte";
   import FilmGrid from "$lib/components/Films/FilmGrid.svelte";
   import Pagination from "$lib/components/Filters/Pagination.svelte";
@@ -41,8 +40,7 @@
       params.set("limit", String(currentFilters.limit));
       if (currentFilters.searchTerm) params.set("q", currentFilters.searchTerm);
       if (currentFilters.region) params.set("region", currentFilters.region);
-      if (currentFilters.statuses)
-        params.set("statuses", currentFilters.statuses.join(","));
+      if (currentFilters.status) params.set("status", currentFilters.status);
       goto(`?${params.toString()}`, { keepFocus: true, noScroll: true });
     });
     return unsubscribe;

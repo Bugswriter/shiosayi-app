@@ -10,25 +10,18 @@
   const filterOptions: { label: string; value: Film["status"] }[] = [
     { label: "Orphan", value: "orphan" },
     { label: "Adopted", value: "adopted" },
-    { label: "Abandoned", value: "abandoned" },
   ];
 
-  function toggleStatusFilter(statusToToggle: Film["status"]) {
+  // --- NEW: Simplified function for tab-like behavior ---
+  // This sets the filter to a single status.
+  function setStatusFilter(newStatus: Film["status"]) {
     filtersStore.update((currentFilters) => {
-      const currentStatuses = currentFilters.statuses || [];
-      const isCurrentlyActive = currentStatuses.includes(statusToToggle);
-      let newStatuses: Film["status"][];
-
-      if (isCurrentlyActive) {
-        newStatuses = currentStatuses.filter((s) => s !== statusToToggle);
-      } else {
-        newStatuses = [...currentStatuses, statusToToggle];
-      }
-
-      return { ...currentFilters, statuses: newStatuses, page: 1 };
+      // No need to check for inclusion, just set the new value.
+      return { ...currentFilters, status: newStatus, page: 1 };
     });
   }
 
+  // --- Region filter logic remains the same ---
   let selectedRegion = $filtersStore.region || "";
   $: selectedRegion = $filtersStore.region || "";
 
@@ -48,30 +41,35 @@
   class="p-4 bg-zinc-100 border rounded-b-lg border-zinc-200 dark:bg-zinc-800 dark:border-zinc-700"
 >
   <div class="flex flex-wrap items-end justify-between gap-x-6 gap-y-4">
+    <!-- Status Filter Buttons -->
     <div>
-      <div class="flex items-center gap-2">
+      <div class="flex items-center gap-3">
         {#each filterOptions as filter (filter.value)}
-          {@const isActive = $filtersStore.statuses?.includes(filter.value)}
-          <button
-            on:click={() => toggleStatusFilter(filter.value)}
-            class="px-4 py-1.5 text-sm rounded-md font-semibold transition-all duration-150 border"
-            class:bg-pink-600={isActive}
-            class:text-white={isActive}
-            class:border-pink-600={isActive}
-            class:shadow-md={isActive}
-            class:hover:bg-pink-700={isActive}
-            class:dark:hover:bg-pink-500={isActive}
-            class:bg-white={!isActive}
-            class:dark:bg-zinc-700={!isActive}
-            class:text-zinc-700={!isActive}
-            class:dark:text-zinc-300={!isActive}
-            class:border-zinc-300={!isActive}
-            class:dark:border-zinc-600={!isActive}
-            class:hover:bg-zinc-50={!isActive}
-            class:dark:hover:bg-zinc-600={!isActive}
-          >
-            {filter.label}
-          </button>
+          <!-- NEW: Check for equality, not inclusion in an array -->
+          {@const isActive = $filtersStore.status === filter.value}
+          <div class="relative rounded-md overflow-hidden">
+            <button
+              on:click={() => setStatusFilter(filter.value)}
+              class="px-4 py-1.5 text-sm rounded-md font-semibold
+         border transition-all duration-200"
+              class:bg-pink-600={isActive}
+              class:text-white={isActive}
+              class:border-pink-700={isActive}
+              class:dark:border-pink-500={isActive}
+              class:shadow-inner={isActive}
+              class:translate-y-px={isActive}
+              class:bg-white={!isActive}
+              class:dark:bg-zinc-700={!isActive}
+              class:text-zinc-700={!isActive}
+              class:dark:text-zinc-300={!isActive}
+              class:border-zinc-300={!isActive}
+              class:dark:border-zinc-600={!isActive}
+              class:shadow-md={!isActive}
+              class:hover:shadow-lg={!isActive}
+            >
+              {filter.label}
+            </button>
+          </div>
         {/each}
       </div>
     </div>
@@ -79,6 +77,8 @@
     <!-- Right Aligned: Region and Search -->
     <div class="flex items-end gap-x-4">
       <div>
+        <!-- FIX: Added a visually hidden label for accessibility -->
+        <label for="region-filter" class="sr-only">Filter by Region</label>
         <select
           id="region-filter"
           class="w-full sm:w-auto md:w-56 h-10 pl-3 pr-10 text-sm bg-white dark:bg-zinc-700 border border-zinc-300 dark:border-zinc-600 rounded-md shadow-sm appearance-none focus:outline-none focus:ring-1 focus:ring-pink-500 focus:border-pink-500"
@@ -95,10 +95,10 @@
       </div>
 
       <div>
-        <label class="block text-sm font-medium mb-1"> </label>
+        <!-- FIX: The empty, problematic <label> tag has been removed -->
         <button
           on:click={() => dispatch("searchClick")}
-          aria-label="Search"
+          aria-label="Search films"
           class="h-10 flex items-center justify-center gap-x-2 px-3 py-2 bg-white dark:bg-zinc-700 text-zinc-500 dark:text-zinc-400 border border-zinc-300 dark:border-zinc-600 rounded-md shadow-sm transition-all hover:border-pink-500 dark:hover:border-pink-500 focus:outline-none focus:ring-1 focus:ring-pink-500 focus:border-pink-500"
         >
           <svg
@@ -125,3 +125,29 @@
     </div>
   </div>
 </div>
+
+<!--
+  This <style> block is new. It adds the "shine" effect on hover.
+  The styles are scoped to this component only.
+-->
+<style>
+  .shine-effect::after {
+    content: "";
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(
+      circle,
+      rgba(255, 255, 255, 0.4) 0%,
+      rgba(255, 255, 255, 0) 70%
+    );
+    transform: scale(0);
+    transition: transform 0.5s ease-out;
+    pointer-events: none;
+  }
+  .shine-effect:hover::after {
+    transform: scale(2);
+  }
+</style>

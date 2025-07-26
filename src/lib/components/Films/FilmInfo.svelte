@@ -17,7 +17,7 @@
     poster_url: string | null;
     region: string | null;
     guardian_id: string | null;
-    status: "orphan" | "adopted" | "abandoned";
+    status: "orphan" | "adopted";
     updated_at: string | null;
     guardian_name: string | null;
   }
@@ -227,7 +227,7 @@
               <!-- This is the logic for showing the correct button -->
               {#if $authStore.status === "authenticated"}
                 <div class="flex flex-col items-end">
-                  {#if film.status === "orphan" || film.status === "abandoned"}
+                  {#if film.status === "orphan"}
                     <!-- Adopt Button -->
                     <button
                       on:click={adoptFilm}

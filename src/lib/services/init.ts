@@ -5,8 +5,8 @@ import { getDatabaseHash, saveDatabaseHash } from "$lib/utils/settings";
 import { settingsStore, authStore } from "$lib/utils/state";
 import { closeDbConnection } from "$lib/services/database";
 
-const DB_URL = "https://sys.shiosayi.org/db/public";
-const HASH_URL = "https://sys.shiosayi.org/db/public.sha256";
+const DB_URL = "https://cdn.shiosayi.org/db/public.db";
+const HASH_URL = "https://cdn.shiosayi.org/db/public.db.sha256";
 const DB_FILENAME = "public.db";
 
 async function downloadAndWriteDb(remoteHash: string): Promise<void> {

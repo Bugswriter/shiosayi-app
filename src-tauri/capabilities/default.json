@@ -13,6 +13,9 @@
       "allow": [
         {
           "url": "https://sys.shiosayi.org/*"
+        },
+        {
+          "url": "https://cdn.shiosayi.org/*"
         }
       ]
     },

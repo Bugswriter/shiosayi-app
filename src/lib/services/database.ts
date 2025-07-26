@@ -6,7 +6,6 @@ export interface Guardian {
   name: string;
   email: string;
   tier: "lover" | "keeper" | "savior";
-  // films: GuardianFilm[]; // REMOVE THIS LINE
 }
 
 export interface AuthState {
@@ -24,7 +23,7 @@ export interface Film {
   poster_url: string | null;
   region: string | null;
   guardian_id: string | null;
-  status: "orphan" | "adopted" | "abandoned";
+  status: "orphan" | "adopted";
   updated_at: string | null;
   guardian_name: string | null;
 }
@@ -38,7 +37,7 @@ export interface GetFilmsOptions {
   page: number;
   limit: number;
   searchTerm?: string;
-  statuses?: ("orphan" | "adopted" | "abandoned")[];
+  status?: "orphan" | "adopted";
   region?: string;
 }
 
@@ -82,7 +81,7 @@ const baseSelectQuery = `
 export async function getFilms(
   options: GetFilmsOptions
 ): Promise<PaginatedFilmsResult> {
-  const { page, limit, searchTerm, statuses, region } = options;
+  const { page, limit, searchTerm, status, region } = options;
 
   const db = await getDb();
   const offset = (page - 1) * limit;
@@ -96,10 +95,9 @@ export async function getFilms(
     params.push(`%${searchTerm}%`);
   }
 
-  if (statuses && statuses.length > 0) {
-    const placeholders = statuses.map(() => `$${paramIndex++}`).join(", ");
-    whereClauses.push(`films.status IN (${placeholders})`);
-    params.push(...statuses);
+  if (status) {
+    whereClauses.push(`films.status = $${paramIndex++}`);
+    params.push(status);
   }
 
   if (region) {
