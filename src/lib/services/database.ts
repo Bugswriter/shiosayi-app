@@ -145,10 +145,10 @@ export async function getRegionsWithFilmCount(): Promise<RegionWithCount[]> {
   return results;
 }
 
-export async function getFilmsByGuardianId(guardianId: string): Promise<Film[]> {
+export async function getFilmsByGuardianId(guardianId: number): Promise<Film[]> {
+  console.log(guardianId)
   const db = await getDb();
   
-  // We only need a few fields for the list display.
   const query = `
     SELECT id, title, year, region
     FROM films
@@ -157,21 +157,23 @@ export async function getFilmsByGuardianId(guardianId: string): Promise<Film[]> 
   `;
 
   try {
-    const films: Film[] = await db.select(query, [guardianId]);
+    const films: Film[] = await db.select(query, [String(guardianId)]);
+    console.log(films)
     return films;
   } catch (error) {
     console.error(`Error fetching films for guardian ${guardianId}:`, error);
-    return []; // Return an empty array on error
+    return [];
   }
 }
 
-export async function countFilmsByGuardianId(guardianId: string): Promise<number> {
+export async function countFilmsByGuardianId(guardianId: number): Promise<number> {
+  console.log(guardianId)
   const db = await getDb();
   
   const query = `SELECT COUNT(*) as count FROM films WHERE guardian_id = $1`;
 
   try {
-    const result: { count: number }[] = await db.select(query, [guardianId]);
+    const result: { count: number }[] = await db.select(query, [String(guardianId)]);
     return result[0]?.count ?? 0; // Return the count, or 0 if something goes wrong
   } catch (error) {
     console.error(`Error counting films for guardian ${guardianId}:`, error);
