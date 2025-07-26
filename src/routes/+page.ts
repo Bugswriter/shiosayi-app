@@ -2,7 +2,7 @@
 import { getFilms, getRegionsWithFilmCount, type GetFilmsOptions, type Film } from '$lib/services/database';
 import type { PageData } from './$types';
 
-export async function load({ url, depends, parent }): Promise<PageData> {
+export async function load({ url, depends, parent }) {
   // This ensures layout data (like auth state) is loaded first.
   await parent();
 

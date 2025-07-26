@@ -268,7 +268,7 @@
                     </button>
                     {#if adoptionError}
                       <p
-                        class="text-xs text-red-500 mt-1 text-right"
+                        class="font-sans text-xs text-red-500 mt-1 text-right"
                         transition:fly={{ y: 5, duration: 200 }}
                       >
                         {adoptionError}

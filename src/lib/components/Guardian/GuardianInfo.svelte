@@ -2,7 +2,11 @@
 <script lang="ts">
   import { onDestroy, onMount } from "svelte";
   import { authStore } from "$lib/utils/state";
-  import { getFilmsByGuardianId } from "$lib/services/database";
+  // --- CORRECT: Import both required database functions ---
+  import {
+    getFilmsByGuardianId,
+    countFilmsByGuardianId,
+  } from "$lib/services/database";
   import type { Film } from "$lib/services/database";
 
   export let isOpen: boolean;
@@ -13,15 +17,21 @@
     savior: 10,
   };
 
-  // --- NEW: Local state for adopted films ---
+  // --- CORRECT: Local state for all necessary data ---
   let isLoadingFilms = true;
   let adoptedFilms: Film[] = [];
+  let adoptionCount = 0;
 
-  // --- NEW: Reactive logic to fetch films when the modal opens ---
+  // --- CORRECT: Reactive logic fetches both films and their count in parallel ---
   $: if (isOpen && $authStore.guardian?.id) {
     isLoadingFilms = true;
-    getFilmsByGuardianId($authStore.guardian.id).then((films) => {
+
+    Promise.all([
+      getFilmsByGuardianId($authStore.guardian.id),
+      countFilmsByGuardianId($authStore.guardian.id),
+    ]).then(([films, count]) => {
       adoptedFilms = films;
+      adoptionCount = count;
       isLoadingFilms = false;
     });
   }
@@ -89,11 +99,11 @@
           </p>
         </div>
 
-        <!-- THE FIX: Use `adoptedFilms.length` -->
         <div class="text-sm">
           <p class="text-zinc-800 dark:text-zinc-300">
             <span class="font-semibold">Adopted Films:</span>
-            {adoptedFilms.length} / {tierLimits[$authStore.guardian.tier]}
+            <!-- CORRECT: Use the dedicated count variable -->
+            {adoptionCount} / {tierLimits[$authStore.guardian.tier]}
           </p>
           <p class="text-zinc-500 dark:text-zinc-400">
             {$authStore.guardian.email}
@@ -108,7 +118,6 @@
               Loading your films...
             </p>
           {:else if adoptedFilms.length > 0}
-            <!-- THE FIX: Use `adoptedFilms` for the loop -->
             <ul class="space-y-2">
               {#each adoptedFilms as film (film.id)}
                 <li class="text-sm text-zinc-800 dark:text-zinc-300">

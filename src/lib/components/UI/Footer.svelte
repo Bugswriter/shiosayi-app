@@ -2,10 +2,16 @@
 <script lang="ts">
   import { createEventDispatcher } from "svelte";
   import { authStore } from "$lib/utils/state";
+  import { getName, getVersion } from "@tauri-apps/api/app";
   import GuardianInfo from "$lib/components/Guardian/GuardianInfo.svelte";
 
   const dispatch = createEventDispatcher();
   let showGuardianInfo = false;
+  let version = "";
+
+  getVersion().then((v) => {
+    version = v;
+  });
 </script>
 
 <GuardianInfo bind:isOpen={showGuardianInfo} />
@@ -14,10 +20,9 @@
   class="fixed bottom-0 left-0 right-0 flex items-center justify-between bg-zinc-100 px-4 py-1 border-t border-zinc-200 text-sm text-zinc-600 shadow-inner z-10 dark:bg-zinc-800 dark:border-zinc-700 dark:text-zinc-400"
 >
   <div class="flex items-center gap-x-4">
-    <span>© {new Date().getFullYear()} Rare Films</span>
-    <span class="hidden sm:block text-xs"
-      >Made with ❤️ using Svelte & Tauri</span
-    >
+    <span class="hidden sm:block text-xs">
+      Shiosayi Community · Version {version}
+    </span>
   </div>
 
   <div class="flex items-center gap-2">
