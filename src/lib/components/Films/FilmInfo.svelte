@@ -138,189 +138,186 @@
 
 {#if film}
   <div
-    class="fixed inset-0 bg-black/70 backdrop-blur-sm z-40"
-    on:click={closeModal}
-    aria-hidden="true"
+    class="fixed inset-0 z-40 flex items-center justify-center bg-black/60 backdrop-blur-sm"
+    tabindex="0"
+    role="dialog"
+    aria-modal="true"
   >
-    <!-- svelte-ignore a11y-click-events-have-key-events a11y-no-static-element-interactions -->
     <div
-      class="fixed top-1/2 left-1/2 w-[95vw] max-w-2xl -translate-x-1/2 -translate-y-1/2 bg-card rounded-xl shadow-2xl overflow-hidden z-50"
-      role="dialog"
-      aria-modal="true"
-      tabindex="0"
+      class="relative w-full max-w-2xl bg-white dark:bg-zinc-800 rounded-xl shadow-2xl overflow-hidden"
+      role="document"
       aria-labelledby="film-title"
-      on:click|stopPropagation
     >
-      <div class="relative">
-        <button
-          on:click={closeModal}
-          class="absolute top-3 right-3 p-1 rounded-full text-muted-foreground hover:bg-accent hover:text-accent-foreground transition-colors"
-          aria-label="Close film details"
+      <!-- The new, correctly styled close button from your reference -->
+      <button
+        on:click={closeModal}
+        class="absolute top-3 right-3 z-10 p-1 text-zinc-400 rounded-full hover:bg-zinc-100 hover:text-zinc-700 dark:hover:bg-zinc-700 dark:hover:text-zinc-200 transition-colors"
+        aria-label="Close modal"
+      >
+        <svg
+          class="h-6 w-6"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+          stroke-width="2"
         >
-          <svg
-            class="w-6 h-6"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-            ><path
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              stroke-width="2"
-              d="M6 18L18 6M6 6l12 12"
-            /></svg
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            d="M6 18L18 6M6 6l12 12"
+          />
+        </svg>
+      </button>
+
+      <!-- 
+        The UNIQUE content for this modal. 
+        This is the original grid layout for the image and text, which is preserved.
+      -->
+      <div class="grid sm:grid-cols-3">
+        <div class="sm:col-span-1 bg-zinc-100 dark:bg-zinc-900">
+          <img
+            src={film.poster_url ||
+              "https://placehold.co/400x600/1f2937/9ca3af?text=No+Poster"}
+            alt="Poster for {film.title}"
+            class="w-full h-full object-cover"
+            on:error={(e) => {
+              const img = e.target as HTMLImageElement;
+              img.src =
+                "https://placehold.co/400x600/1f2937/9ca3af?text=No+Poster";
+            }}
+          />
+        </div>
+
+        <div class="sm:col-span-2 p-6 sm:p-8 flex flex-col">
+          <h2
+            id="film-title"
+            class="text-2xl lg:text-3xl font-bold text-zinc-900 dark:text-zinc-100 mb-1"
           >
-        </button>
-
-        <div class="grid sm:grid-cols-3">
-          <div class="sm:col-span-1 bg-secondary">
-            <img
-              src={film.poster_url ||
-                "https://placehold.co/400x600/1f2937/9ca3af?text=No+Poster"}
-              alt="Poster for {film.title}"
-              class="w-full h-full object-cover"
-              on:error={(e) => {
-                const img = e.target as HTMLImageElement;
-                img.src =
-                  "https://placehold.co/400x600/1f2937/9ca3af?text=No+Poster";
-              }}
-            />
+            {film.title}
+          </h2>
+          <div
+            class="text-sm text-zinc-600 dark:text-zinc-400 mb-4 flex items-center flex-wrap"
+          >
+            {#if film.year}<span>{film.year}</span>{/if}
+            {#if film.region}{#if film.year}<span class="mx-2">•</span
+                >{/if}<span>{film.region}</span>{/if}
           </div>
+          <p
+            class="text-zinc-800 dark:text-zinc-300 mb-6 flex-grow min-h-[6rem]"
+          >
+            {film.plot || "No plot summary available."}
+          </p>
 
-          <div class="sm:col-span-2 p-6 sm:p-8 flex flex-col">
-            <h2
-              id="film-title"
-              class="text-2xl lg:text-3xl font-bold text-card-foreground mb-1"
-            >
-              {film.title}
-            </h2>
-            <div
-              class="text-sm text-muted-foreground mb-4 flex items-center flex-wrap"
-            >
-              {#if film.year}<span>{film.year}</span>{/if}
-              {#if film.region}{#if film.year}<span class="mx-2">•</span
-                  >{/if}<span>{film.region}</span>{/if}
-            </div>
-            <p class="text-foreground mb-6 flex-grow min-h-[6rem]">
-              {film.plot || "No plot summary available."}
-            </p>
-
-            <div
-              class="text-xs border-t border-border pt-3 mt-auto flex justify-between items-start"
-            >
-              <div class="text-muted-foreground">
+          <div
+            class="text-xs border-t border-zinc-200 dark:border-zinc-700 pt-3 mt-auto flex justify-between items-start"
+          >
+            <div class="text-zinc-600 dark:text-zinc-400">
+              <p>
+                Status: <span
+                  class="font-medium capitalize text-zinc-800 dark:text-zinc-200"
+                  >{film.status}</span
+                >
+              </p>
+              {#if film.guardian_name}
                 <p>
-                  Status: <span
-                    class="font-medium capitalize text-secondary-foreground"
-                    >{film.status}</span
+                  Guardian: <span
+                    class="font-medium text-zinc-800 dark:text-zinc-200"
+                    >{film.guardian_name}</span
                   >
                 </p>
-                {#if film.guardian_name}
-                  <p>
-                    Guardian: <span
-                      class="font-medium text-secondary-foreground"
-                      >{film.guardian_name}</span
-                    >
-                  </p>
-                {/if}
-              </div>
-
-              <!-- This is the logic for showing the correct button -->
-              {#if $authStore.status === "authenticated"}
-                <div class="flex flex-col items-end">
-                  {#if film.status === "orphan"}
-                    <!-- Adopt Button -->
-                    <button
-                      on:click={adoptFilm}
-                      disabled={isAdopting || isAdoptionLimitReached}
-                      class="inline-flex items-center justify-center gap-2 h-8 px-3 text-xs font-semibold rounded-md transition-colors
-                             bg-pink-600 text-white hover:bg-pink-700
-                             disabled:opacity-50 disabled:pointer-events-none"
-                      title={isAdoptionLimitReached && $authStore.guardian
-                        ? `You have reached your tier limit of ${tierLimits[$authStore.guardian.tier]} films.`
-                        : "Adopt this film"}
-                    >
-                      {#if isAdopting}
-                        <div
-                          class="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin"
-                        ></div>
-                      {:else if adoptionSuccess}
-                        <span in:fly={{ y: -5, duration: 200 }}>Adopted!</span>
-                      {:else}
-                        <svg
-                          xmlns="http://www.w3.org/2000/svg"
-                          width="14"
-                          height="14"
-                          viewBox="0 0 24 24"
-                          fill="none"
-                          stroke="currentColor"
-                          stroke-width="2"
-                          stroke-linecap="round"
-                          stroke-linejoin="round"
-                          class="lucide lucide-heart-handshake"
-                          ><path
-                            d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"
-                          /><path
-                            d="M12 5 9.04 7.96a2.17 2.17 0 0 0 0 3.08v0c.82.82 2.13.82 2.94 0l.02-.02 2.92-2.92"
-                          /></svg
-                        >
-                        <span>Adopt Film</span>
-                      {/if}
-                    </button>
-                    {#if adoptionError}
-                      <p
-                        class="font-sans text-xs text-red-500 mt-1 text-right"
-                        transition:fly={{ y: 5, duration: 200 }}
-                      >
-                        {adoptionError}
-                      </p>
-                    {/if}
-                  {:else}
-                    <!-- Get Magnet Button -->
-                    <button
-                      on:click={getMagnetLink}
-                      disabled={isFetchingMagnet || magnetSuccess}
-                      class="inline-flex items-center justify-center gap-2 h-8 px-3 text-xs font-semibold rounded-md transition-colors bg-accent text-accent-foreground hover:bg-accent/80 disabled:opacity-50 disabled:pointer-events-none"
-                    >
-                      {#if isFetchingMagnet}
-                        <div
-                          class="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin"
-                        ></div>
-                      {:else if magnetSuccess}
-                        <span in:fly={{ y: -5, duration: 200 }}>Copied!</span>
-                      {:else}
-                        <svg
-                          xmlns="http://www.w3.org/2000/svg"
-                          width="14"
-                          height="14"
-                          viewBox="0 0 24 24"
-                          fill="none"
-                          stroke="currentColor"
-                          stroke-width="2"
-                          stroke-linecap="round"
-                          stroke-linejoin="round"
-                          ><path d="m6 15-4-4 6.5-6.5" /><path
-                            d="m21 21-4-4"
-                          /><path d="m15 6 3.4-3.4" /><path
-                            d="M18 9a3 3 0 0 0-3-3"
-                          /><path d="M9 18a3 3 0 0 0-3-3" /><path
-                            d="M18 15a6 6 0 0 0-6-6h-2a6 6 0 0 0-6 6v2a6 6 0 0 0 6 6h2a6 6 0 0 0 6-6Z"
-                          /></svg
-                        >
-                        <span>Get Magnet</span>
-                      {/if}
-                    </button>
-                    {#if magnetError}
-                      <p
-                        class="text-xs text-red-500 mt-1 text-right"
-                        transition:fly={{ y: 5, duration: 200 }}
-                      >
-                        {magnetError}
-                      </p>
-                    {/if}
-                  {/if}
-                </div>
               {/if}
             </div>
+
+            {#if $authStore.status === "authenticated"}
+              <div class="flex flex-col items-end">
+                {#if film.status === "orphan"}
+                  <button
+                    on:click={adoptFilm}
+                    disabled={isAdopting || isAdoptionLimitReached}
+                    class="inline-flex items-center justify-center gap-2 h-8 px-3 text-xs font-semibold rounded-md transition-colors bg-pink-600 text-white hover:bg-pink-700 disabled:opacity-50 disabled:pointer-events-none"
+                    title={isAdoptionLimitReached && $authStore.guardian
+                      ? `You have reached your tier limit of ${tierLimits[$authStore.guardian.tier]} films.`
+                      : "Adopt this film"}
+                  >
+                    {#if isAdopting}
+                      <div
+                        class="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin"
+                      ></div>
+                    {:else if adoptionSuccess}
+                      <span in:fly={{ y: -5, duration: 200 }}>Adopted!</span>
+                    {:else}
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        width="14"
+                        height="14"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        ><path
+                          d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"
+                        /><path
+                          d="M12 5 9.04 7.96a2.17 2.17 0 0 0 0 3.08v0c.82.82 2.13.82 2.94 0l.02-.02 2.92-2.92"
+                        /></svg
+                      >
+                      <span>Adopt Film</span>
+                    {/if}
+                  </button>
+                  {#if adoptionError}
+                    <p
+                      class="font-sans text-xs text-red-500 mt-1 text-right"
+                      transition:fly={{ y: 5, duration: 200 }}
+                    >
+                      {adoptionError}
+                    </p>
+                  {/if}
+                {:else}
+                  <button
+                    on:click={getMagnetLink}
+                    disabled={isFetchingMagnet || magnetSuccess}
+                    class="inline-flex items-center justify-center gap-2 h-8 px-3 text-xs font-semibold rounded-md transition-colors bg-zinc-200 text-zinc-800 hover:bg-zinc-300 dark:bg-zinc-700 dark:text-zinc-200 dark:hover:bg-zinc-600 disabled:opacity-50 disabled:pointer-events-none"
+                  >
+                    {#if isFetchingMagnet}
+                      <div
+                        class="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin"
+                      ></div>
+                    {:else if magnetSuccess}
+                      <span in:fly={{ y: -5, duration: 200 }}>Copied!</span>
+                    {:else}
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        width="14"
+                        height="14"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        ><path d="m6 15-4-4 6.5-6.5" /><path
+                          d="m21 21-4-4"
+                        /><path d="m15 6 3.4-3.4" /><path
+                          d="M18 9a3 3 0 0 0-3-3"
+                        /><path d="M9 18a3 3 0 0 0-3-3" /><path
+                          d="M18 15a6 6 0 0 0-6-6h-2a6 6 0 0 0-6 6v2a6 6 0 0 0 6 6h2a6 6 0 0 0 6-6Z"
+                        /></svg
+                      >
+                      <span>Get Magnet</span>
+                    {/if}
+                  </button>
+                  {#if magnetError}
+                    <p
+                      class="text-xs text-red-500 mt-1 text-right"
+                      transition:fly={{ y: 5, duration: 200 }}
+                    >
+                      {magnetError}
+                    </p>
+                  {/if}
+                {/if}
+              </div>
+            {/if}
           </div>
         </div>
       </div>
