@@ -244,7 +244,9 @@
                         class="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin"
                       ></div>
                     {:else if adoptionSuccess}
-                      <span in:fly={{ y: -5, duration: 200 }}>Adopted!</span>
+                      <span in:fly={{ y: -5, duration: 200 }}
+                        >Request Sent!</span
+                      >
                     {:else}
                       <svg
                         xmlns="http://www.w3.org/2000/svg"
