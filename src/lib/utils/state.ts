@@ -3,6 +3,15 @@ import { writable } from "svelte/store";
 import type { GetFilmsOptions } from "$lib/services/database";
 import { loadSettings, saveTheme, saveApiKey, type AppSettings, type Theme } from "./settings";
 import { fetch as httpFetch } from "@tauri-apps/plugin-http";
+import { initializeApp } from "$lib/services/init";
+
+
+const promise = initializeApp();
+
+// We wrap the promise in a writable store. This allows the Svelte UI
+// to subscribe to it using the '$' syntax in the await block.
+export const initializationPromise = writable(promise); // <-- 2. CREATE and EXPORT the store
+
 
 // --- Guardian and Auth Types ---
 export interface GuardianFilm {
