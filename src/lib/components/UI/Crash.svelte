@@ -1,9 +1,12 @@
 <!-- src/lib/components/UI/Crash.svelte -->
 <script lang="ts">
   import { createEventDispatcher } from "svelte";
-  import { appError } from "$lib/utils/state";
+  // No longer need to import `appError` here!
 
-  const dispatch = createEventDispatcher();
+  /** The error message to display. Passed in from the parent. */
+  export let message: string | null;
+
+  const dispatch = createEventDispatcher("retry");
 </script>
 
 <div
@@ -14,7 +17,8 @@
       Application Error
     </h1>
     <p class="mt-4 text-base text-zinc-600 dark:text-zinc-300">
-      {$appError || "An unknown error occurred during startup."}
+      <!-- Use the 'message' prop here instead of the global store -->
+      {message || "An unknown error occurred during startup."}
     </p>
     <button
       on:click={() => dispatch("retry")}
